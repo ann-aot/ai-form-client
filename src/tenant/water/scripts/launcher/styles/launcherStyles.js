@@ -54,6 +54,27 @@ export const LAUNCHER_STYLES = `
             background: #3470B1;
         }
 
+        /* Notice marker ---------------------------------------------------------
+           Inline beside the label rather than absolutely positioned in the corner:
+           the button's width hugs its text, so a corner badge would sit half outside
+           the rounded edge and clip. Raised by align-self instead of by superscript
+           so it cannot alter the button's line height.
+
+           aria-hidden in the markup, because the asterisk is not information on its
+           own - the message it marks is announced by the tooltip's role="status". */
+        .wp-chat-launcher-badge {
+            align-self: flex-start;
+            margin-left: 4px;
+            color: #CE3E39;
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 14px;
+        }
+
+        .wp-chat-launcher-badge[hidden] {
+            display: none;
+        }
+
         /* 3. Helper message -----------------------------------------------------
            pointer-events: none is load-bearing, not cosmetic - the message overlaps
            the form, and the story requires that it never blocks interaction. */

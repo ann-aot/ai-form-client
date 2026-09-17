@@ -31,10 +31,10 @@ function escapeHtml(value) {
         .replaceAll("'", '&#39;');
 }
 
-/** True when the helper message has not been shown in this browser session yet. */
-function shouldShowTooltip() {
+/** True when the message under this key has not been shown in this session yet. */
+function shouldShowTooltip(seenKey) {
     try {
-        return !sessionStorage.getItem(LAUNCHER_TOOLTIP_SEEN_KEY);
+        return !sessionStorage.getItem(seenKey);
     } catch {
         // Storage blocked (private mode, cookie policy). Showing the message is the
         // safer failure: worst case it reappears, rather than never appearing.
@@ -42,9 +42,9 @@ function shouldShowTooltip() {
     }
 }
 
-function markTooltipSeen() {
+function markTooltipSeen(seenKey) {
     try {
-        sessionStorage.setItem(LAUNCHER_TOOLTIP_SEEN_KEY, '1');
+        sessionStorage.setItem(seenKey, '1');
     } catch {
         // Nothing to do - the message simply may show again on the next page.
     }
@@ -63,7 +63,7 @@ export function buildLauncherHtml(content = LAUNCHER_CONTENT) {
                 <div class="wp-chat-launcher-tooltip-body">${escapeHtml(content.tooltip)}</div>
                 <span class="wp-chat-launcher-tooltip-arrow"></span>
             </div>
-            <button class="wp-chat-button" id="wp-chat-button" type="button"><span class="wp-chat-button-label">${escapeHtml(content.label)}</span></button>
+            <button class="wp-chat-button" id="wp-chat-button" type="button"><span class="wp-chat-button-label">${escapeHtml(content.label)}</span><span class="wp-chat-launcher-badge" id="wp-chat-launcher-badge" aria-hidden="true" hidden>*</span></button>
         </div>`;
 }
 
@@ -74,13 +74,27 @@ export function buildLauncherHtml(content = LAUNCHER_CONTENT) {
  * Listeners are capture-phase and passive so they observe the interaction without
  * changing it, and they remove themselves after firing once.
  *
+ * A `notice` replaces the first-visit message with a one-off of its own and marks
+ * the button with an asterisk. It is not queued behind the first-visit message:
+ * both occupy the same spot, and a notice is true only right now, whereas the
+ * first-visit message is the same on any page the user reaches later.
+ *
  * @param {object} options
  * @param {HTMLElement} options.root - element containing the launcher markup
- * @returns {{ hideTooltip: () => void }}
+ * @param {object} [options.content] - the content object the launcher was built from
+ * @param {{ text: string, seenKey: string }} [options.notice] - message to show in
+ *   place of the first-visit one, under its own seen-key, with the asterisk
+ * @returns {{ hideTooltip: () => void, hideNotice: () => void }}
  */
-export function createLauncher({ root }) {
+export function createLauncher({ root, content = LAUNCHER_CONTENT, notice = null }) {
     const tooltip = root ? root.querySelector('#wp-chat-launcher-tooltip') : null;
-    if (!tooltip) return { hideTooltip: () => {} };
+    const badge = root ? root.querySelector('#wp-chat-launcher-badge') : null;
+    if (!tooltip) return { hideTooltip: () => {}, hideNotice: () => {} };
+
+    const tooltipBody = tooltip.querySelector('.wp-chat-launcher-tooltip-body');
+    const message = notice ? notice.text : content.tooltip;
+    const seenKey = notice ? notice.seenKey : LAUNCHER_TOOLTIP_SEEN_KEY;
+    if (notice && tooltipBody) tooltipBody.textContent = message;
 
     // Anything that counts as the user getting on with their work.
     const DISMISS_EVENTS = ['scroll', 'click', 'keydown', 'touchstart', 'wheel', 'pointerdown'];
@@ -88,14 +102,31 @@ export function createLauncher({ root }) {
     function hideTooltip() {
         if (tooltip.hidden) return;
         tooltip.hidden = true;
-        markTooltipSeen();
+        markTooltipSeen(seenKey);
         DISMISS_EVENTS.forEach((eventName) => {
             document.removeEventListener(eventName, hideTooltip, true);
         });
     }
 
-    if (!shouldShowTooltip()) {
-        return { hideTooltip };
+    /**
+     * Retire the notice for good.
+     *
+     * The asterisk outlives the message on purpose - the message steps aside as soon
+     * as the user gets on with their work, and the asterisk is then the only thing
+     * left saying there is something here to come back to. Both go once the user has
+     * actually opened the chat, which is what the notice was asking for.
+     */
+    function hideNotice() {
+        if (badge) badge.hidden = true;
+        hideTooltip();
+    }
+
+    // The asterisk is shown even where the message is not: a user returning after a
+    // postback has already had the message dismissed out from under them.
+    if (notice && badge) badge.hidden = false;
+
+    if (!shouldShowTooltip(seenKey)) {
+        return { hideTooltip, hideNotice };
     }
 
     tooltip.hidden = false;
@@ -103,5 +134,5 @@ export function createLauncher({ root }) {
         document.addEventListener(eventName, hideTooltip, { capture: true, passive: true });
     });
 
-    return { hideTooltip };
+    return { hideTooltip, hideNotice };
 }

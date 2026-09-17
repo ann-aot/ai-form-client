@@ -21,6 +21,9 @@ import { buildLauncherHtml, createLauncher } from './launcher/ui/launcher.js';
 import { FORM_OVERLAY_STYLES } from './form-overlay/styles/formOverlayStyles.js';
 import { showFormOverlay, hideFormOverlay } from './form-overlay/ui/formOverlay.js';
 import { PRODUCT_NAME } from './shared/productName.js';
+import { isPopupWindow, saveChatOpenState, wasParentChatOpen } from './shared/windowContext.js';
+import { POPUP_CALLOUT_STYLES } from './popup-callout/styles/popupCalloutStyles.js';
+import { buildPopupCalloutHtml, createPopupCallout, POPUP_LAUNCHER_NOTICE } from './popup-callout/ui/popupCallout.js';
 
 /**
  * Allow testing of alternative javascript
@@ -1093,6 +1096,8 @@ function injectStyles() {
 
         ${FORM_OVERLAY_STYLES}
 
+        ${POPUP_CALLOUT_STYLES}
+
         .wp-chat-modal {
             display: none;
             position: fixed;
@@ -1447,6 +1452,7 @@ ${buildLauncherHtml()}
                     </button>
                 </div>
             </div>
+${buildPopupCalloutHtml()}
 
             <div class="wp-chat-messages" id="wp-chat-messages">${buildWelcomePanelHtml()}
 
@@ -1487,6 +1493,18 @@ ${buildDeleteChatDialogHtml()}
     const typingIndicator = document.getElementById('wp-chat-typing');
     const guidedQuestionsContainer = document.getElementById('wp-chat-guided-questions');
 
+    /**
+     * Whether this window is a popup whose opener had the chat open.
+     *
+     * Read here, before saveChatOpenState() below overwrites it. The widget is
+     * rebuilt closed on every postback, so the recorded state has to be reset to that
+     * truth each time - otherwise a popup opened after a postback would inherit
+     * "open" from a chat the user had already closed.
+     */
+    const isPopup = isPopupWindow();
+    const parentChatWasOpen = isPopup && wasParentChatOpen();
+    saveChatOpenState(false);
+
     let sessionId = getStoredThreadId();
     let restoredScrollTop = loadChatScrollPosition(sessionId);
     let guidedQuestionsRequestToken = 0;
@@ -1517,7 +1535,18 @@ ${buildDeleteChatDialogHtml()}
     createExpandToggle({ root: chatModal, modal: chatModal });
 
     // Shows the first-visit helper message and retires it on the first interaction.
-    createLauncher({ root: chatLauncher });
+    // In a popup opened from a closed chat there is something more useful to say, so
+    // the launcher carries that instead, marked with an asterisk: the conversation is
+    // still here, and nothing about a fresh browser window suggests it.
+    const launcher = createLauncher({
+        root: chatLauncher,
+        notice: isPopup && !parentChatWasOpen ? POPUP_LAUNCHER_NOTICE : null
+    });
+
+    // Explains, in a popup, that the conversation carries over - and offers to make
+    // the window bigger. Shown only by the branches below; building it is not
+    // showing it.
+    const popupCallout = createPopupCallout({ root: chatModal });
 
     const deleteChatDialog = createDeleteChatDialog({
         root: chatModal,
@@ -1775,29 +1804,62 @@ ${buildDeleteChatDialogHtml()}
 
     requestAnimationFrame(restoreChatScrollPosition);
 
-    function toggleChat() {
-        const isOpen = chatModal.classList.contains('open');
-        if (!isOpen) {
-            // Opening the chat does a few UI-sync steps together:
-            // 1. show the modal,
-            // 2. hide the floating launcher button,
-            // 3. restore the last saved scroll position on the next paint,
-            // 4. refresh guided questions for the current step,
-            // 5. move keyboard focus into the input so the user can type immediately.
-            chatModal.classList.add('open');
-            chatLauncher.style.display = 'none';
-            requestAnimationFrame(restoreChatScrollPosition);
-            refreshGuidedQuestions();
-            chatInput.focus();
-        } else {
-            chatModal.classList.remove('open');
-            chatLauncher.style.display = 'flex';
+    /**
+     * Opening the chat does a few UI-sync steps together:
+     * 1. show the modal,
+     * 2. hide the floating launcher button,
+     * 3. restore the last saved scroll position on the next paint,
+     * 4. refresh guided questions for the current step,
+     * 5. record the open state, so a popup opened from here can match it,
+     * 6. move keyboard focus into the input so the user can type immediately.
+     *
+     * Step 6 is the one callers differ on. A user who clicked the launcher is asking
+     * to type; a popup opening the chat on its own is not, and pulling focus out of
+     * the sub-form the user came here to fill in would be a theft.
+     */
+    function openChat({ focusInput = true } = {}) {
+        chatModal.classList.add('open');
+        chatLauncher.style.display = 'none';
+        requestAnimationFrame(restoreChatScrollPosition);
+        refreshGuidedQuestions();
+        saveChatOpenState(true);
+        if (isPopup) {
+            // The launcher notice asked for exactly this, so it has nothing left to
+            // ask; the banner repeats it where the user is now looking, and adds the
+            // one thing the tooltip could not offer - a button that resizes the
+            // window. Both show once per popup and guard that themselves.
+            launcher.hideNotice();
+            popupCallout.show();
         }
+        if (focusInput) chatInput.focus();
+    }
+
+    function closeChat() {
+        chatModal.classList.remove('open');
+        chatLauncher.style.display = 'flex';
+        saveChatOpenState(false);
+    }
+
+    function toggleChat() {
+        if (chatModal.classList.contains('open')) closeChat();
+        else openChat();
     }
 
     document.addEventListener(FORM_UPDATE_COMPLETE_EVENT, () => {
         if (!chatModal.classList.contains('open')) toggleChat();
     });
+
+    /**
+     * A popup continues the conversation the form window started.
+     *
+     * Opened while the user had the chat open, this window opens it too and says so,
+     * because nothing else in a fresh browser window suggests the history survived.
+     * Focus stays where the user put it. When the form window's chat was closed
+     * nothing opens here either - the launcher carries the same message instead.
+     */
+    if (parentChatWasOpen && !chatModal.classList.contains('open')) {
+        openChat({ focusInput: false });
+    }
 
     chatButton.addEventListener('click', toggleChat);
     closeBtn.addEventListener('click', toggleChat);
