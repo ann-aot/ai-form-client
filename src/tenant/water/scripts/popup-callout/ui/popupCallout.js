@@ -12,20 +12,30 @@
  */
 
 /**
- * Shown once per popup window.
+ * Set when the user dismisses the banner, so it stays gone.
+ *
+ * It records a decision rather than an appearance. Selecting a field in a Posse
+ * sub-form posts the page back and rebuilds the widget from scratch, several times
+ * over in a short form - showing the banner only on the first of those meant it
+ * vanished a moment after the user arrived, for no reason they could see. It now
+ * stays until they close it.
  *
  * sessionStorage is the right store twice over: a popup inherits its opener's copy at
  * creation, and the main form never shows this banner, so the key can only have been
- * written by this popup itself - which is what makes it survive the popup's own
- * postbacks without following the user into the next popup they open.
+ * written by this popup itself - which is what makes the dismissal survive the
+ * popup's own postbacks without following the user into the next popup they open.
  */
-export const POPUP_CALLOUT_SEEN_KEY = 'nrAiForm_popupCalloutSeen';
+export const POPUP_CALLOUT_DISMISSED_KEY = 'nrAiForm_popupCalloutDismissed';
 
 export const POPUP_CALLOUT_CONTENT = {
-    message: "Hey! You can continue the conversation here \u2014 your chat history won't be lost.",
-    hint: 'This window is small. You can make it bigger if you would like more room.',
-    action: 'Make this window bigger',
-    // Shown in place of the button when the browser declines to resize the window.
+    message: 'Continue your conversation here.',
+    // About the conversation, not about the window, so it outlives the resize offer:
+    // once the window has been expanded, the reassurance is still the reason the
+    // banner is here at all.
+    hint: 'Your chat history will stay with you.',
+    action: 'Expand to see more of the form',
+    // Added below the button when the browser declines to resize the window. Its own
+    // line rather than a rewrite of the hint, which says nothing about size.
     actionFallback: 'Your browser would not resize the window. Drag its edge instead.',
     dismissLabel: 'Dismiss this message'
 };
@@ -50,6 +60,9 @@ export const POPUP_LAUNCHER_NOTICE = {
 const PREFERRED_WIDTH = 1100;
 const PREFERRED_HEIGHT = 850;
 
+const INFO_ICON = `<svg class="wp-popup-callout-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>`;
+const EXPAND_ICON = `<svg class="wp-popup-callout-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>`;
+
 function escapeHtml(value) {
     return String(value ?? '')
         .replaceAll('&', '&amp;')
@@ -59,21 +72,21 @@ function escapeHtml(value) {
         .replaceAll("'", '&#39;');
 }
 
-function hasSeenCallout() {
+function wasCalloutDismissed() {
     try {
-        return Boolean(sessionStorage.getItem(POPUP_CALLOUT_SEEN_KEY));
+        return Boolean(sessionStorage.getItem(POPUP_CALLOUT_DISMISSED_KEY));
     } catch {
-        // Storage blocked. Showing it again on the next postback is the milder
-        // failure, so treat "cannot tell" as "not seen".
+        // Storage blocked. Showing the banner again is the milder failure, so treat
+        // "cannot tell" as "not dismissed".
         return false;
     }
 }
 
-function markCalloutSeen() {
+function markCalloutDismissed() {
     try {
-        sessionStorage.setItem(POPUP_CALLOUT_SEEN_KEY, '1');
+        sessionStorage.setItem(POPUP_CALLOUT_DISMISSED_KEY, '1');
     } catch {
-        // Nothing to do - the banner may simply reappear.
+        // Nothing to do - the banner may reappear after the next postback.
     }
 }
 
@@ -85,14 +98,34 @@ function markCalloutSeen() {
  * actually changed size: browsers are inconsistent about honouring this and refuse
  * silently, so the caller checks rather than assumes.
  */
-function enlargeWindow() {
+function getGrowthTarget() {
     const widthBefore = window.outerWidth;
     const heightBefore = window.outerHeight;
 
     const roomRight = (screen.availLeft || 0) + screen.availWidth - window.screenX;
     const roomBelow = (screen.availTop || 0) + screen.availHeight - window.screenY;
-    const targetWidth = Math.max(widthBefore, Math.min(PREFERRED_WIDTH, roomRight));
-    const targetHeight = Math.max(heightBefore, Math.min(PREFERRED_HEIGHT, roomBelow));
+    return {
+        widthBefore,
+        heightBefore,
+        targetWidth: Math.max(widthBefore, Math.min(PREFERRED_WIDTH, roomRight)),
+        targetHeight: Math.max(heightBefore, Math.min(PREFERRED_HEIGHT, roomBelow))
+    };
+}
+
+/**
+ * Whether growing the window would visibly do anything.
+ *
+ * A user who already expanded the window keeps meeting the banner after every
+ * postback, and an offer that cannot change anything is worse than no offer.
+ */
+function canGrowWindow() {
+    const { widthBefore, heightBefore, targetWidth, targetHeight } = getGrowthTarget();
+    // A few pixels of headroom is not room; window chrome varies by platform.
+    return targetWidth > widthBefore + 16 || targetHeight > heightBefore + 16;
+}
+
+function enlargeWindow() {
+    const { widthBefore, heightBefore, targetWidth, targetHeight } = getGrowthTarget();
 
     try {
         window.resizeTo(targetWidth, targetHeight);
@@ -111,11 +144,12 @@ function enlargeWindow() {
  */
 export function buildPopupCalloutHtml(content = POPUP_CALLOUT_CONTENT) {
     return `
-            <div class="wp-popup-callout" id="wp-popup-callout" role="status" hidden>
+            <div class="wp-popup-callout" id="wp-popup-callout" role="status" hidden>${INFO_ICON}
                 <div class="wp-popup-callout-body">
                     <p class="wp-popup-callout-message">${escapeHtml(content.message)}</p>
                     <p class="wp-popup-callout-hint" id="wp-popup-callout-hint">${escapeHtml(content.hint)}</p>
-                    <button class="wp-popup-callout-action" id="wp-popup-callout-resize" type="button">${escapeHtml(content.action)}</button>
+                    <button class="wp-popup-callout-action" id="wp-popup-callout-resize" type="button">${EXPAND_ICON}${escapeHtml(content.action)}</button>
+                    <p class="wp-popup-callout-note" id="wp-popup-callout-note" hidden></p>
                 </div>
                 <button class="wp-popup-callout-dismiss" id="wp-popup-callout-dismiss" type="button" aria-label="${escapeHtml(content.dismissLabel)}" title="${escapeHtml(content.dismissLabel)}">
                     <svg class="wp-popup-callout-dismiss-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
@@ -135,38 +169,43 @@ export function createPopupCallout({ root, content = POPUP_CALLOUT_CONTENT }) {
     const callout = root ? root.querySelector('#wp-popup-callout') : null;
     if (!callout) return { show: () => {}, dismiss: () => {} };
 
-    const hint = callout.querySelector('#wp-popup-callout-hint');
+    const note = callout.querySelector('#wp-popup-callout-note');
     const resizeButton = callout.querySelector('#wp-popup-callout-resize');
     const dismissButton = callout.querySelector('#wp-popup-callout-dismiss');
 
     function dismiss() {
         callout.hidden = true;
+        markCalloutDismissed();
     }
 
     /**
-     * Show the banner unless this window has already had it.
+     * Show the banner unless the user has closed it in this window.
      *
-     * Marked seen on display rather than on dismissal: the point is one appearance
-     * per popup, and a user who ignores it should not meet it again after the next
-     * postback.
+     * Nothing is recorded here: the banner is meant to persist across the postbacks
+     * a sub-form makes as the user works through it, and only their own dismissal
+     * ends it.
      */
     function show() {
-        if (hasSeenCallout()) return;
+        if (wasCalloutDismissed()) return;
+        // The offer to expand is withheld once the window has nowhere left to grow -
+        // after a postback this is what stops a resized window being offered another
+        // resize that would do nothing.
+        if (resizeButton && !canGrowWindow()) resizeButton.hidden = true;
         callout.hidden = false;
-        markCalloutSeen();
     }
 
     if (resizeButton) {
         resizeButton.addEventListener('click', () => {
-            if (enlargeWindow()) {
-                // The window is now as big as it is going to get, so the offer has
-                // nothing left to offer.
-                resizeButton.hidden = true;
-                if (hint) hint.hidden = true;
-                return;
-            }
+            // Either way the offer is spent: the window is as big as it is going to
+            // get, or the browser has refused and clicking again will not change
+            // that. The line above it stays in both cases - it is about the
+            // conversation, which is still the point of the banner.
+            const grew = enlargeWindow();
             resizeButton.hidden = true;
-            if (hint) hint.textContent = content.actionFallback;
+            if (!grew && note) {
+                note.textContent = content.actionFallback;
+                note.hidden = false;
+            }
         });
     }
 

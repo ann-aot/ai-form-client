@@ -1596,6 +1596,10 @@ ${buildDeleteChatDialogHtml()}
 
         sessionId = getStoredThreadId();
         saveThreadId(sessionId);
+        // The list is now empty and the thread is new, so that is what this window
+        // knows about - otherwise the next sync would compare the fresh thread's
+        // empty history against the discarded one's and redraw for nothing.
+        rememberRenderedHistory();
         restoredScrollTop = 0;
         chatMessages.scrollTop = 0;
         pendingGuidedQuestion = null;
@@ -1611,12 +1615,77 @@ ${buildDeleteChatDialogHtml()}
     saveApplicationIdtoSessionStorage();
 
     const existingHistory = loadChatHistory(sessionId);
+
+    /**
+     * What this window last drew, as stored JSON.
+     *
+     * A window renders its messages once and keeps them in the DOM; localStorage is
+     * the only thing the form window and its popups share. So "has anything changed"
+     * cannot be asked of the screen - it has to be asked of storage, against a record
+     * of what this window already knows about.
+     */
+    let renderedHistoryJson = JSON.stringify(existingHistory);
     if (existingHistory.length > 0) {
         renderHistoryEntries(existingHistory, false);
     }
 
     initWebSocket(sessionId);
     restoreConversationHistoryFromBackend(existingHistory.length > 0);
+
+    function rememberRenderedHistory() {
+        renderedHistoryJson = JSON.stringify(loadChatHistory(sessionId));
+    }
+
+    /**
+     * Redraw the message list if another window has added to the conversation.
+     *
+     * The popups and the form window share one thread, so a question asked in a
+     * popup belongs to the conversation the form window is showing - but that window
+     * has no reason to know it happened, and until now only a page reload brought it
+     * in. Both windows run this, so it works in either direction.
+     *
+     * A full redraw rather than appending the difference: every message on screen is
+     * persisted as it is added, so storage is the whole truth about what should be
+     * displayed, and rebuilding from it cannot drift the way a merge can. The typing
+     * indicator and the guided-question list live outside the message nodes, so they
+     * are left alone.
+     */
+    function syncHistoryFromStorage() {
+        const history = loadChatHistory(sessionId);
+        const historyJson = JSON.stringify(history);
+        if (historyJson === renderedHistoryJson) return;
+        renderedHistoryJson = historyJson;
+
+        // Someone reading back through the conversation should stay where they were;
+        // someone at the live end should be carried along by what just arrived.
+        const wasAtBottom =
+            chatMessages.scrollHeight - chatMessages.scrollTop - chatMessages.clientHeight < 40;
+        const previousScrollTop = chatMessages.scrollTop;
+
+        chatMessages.querySelectorAll('.wp-chat-message').forEach((message) => message.remove());
+        renderHistoryEntries(history, false);
+
+        chatMessages.scrollTop = wasAtBottom ? chatMessages.scrollHeight : previousScrollTop;
+    }
+
+    /**
+     * localStorage fires this only in the *other* windows, which is exactly the set
+     * that needs to redraw - the window that sent the message already has it.
+     */
+    window.addEventListener('storage', (event) => {
+        // A null key means the whole store was cleared; anything else is only our
+        // business when it is this thread's history.
+        if (event.key !== null && event.key !== getHistoryStorageKey(sessionId)) return;
+        syncHistoryFromStorage();
+    });
+
+    /**
+     * The storage event is the live path; this is the one that catches up. A popup
+     * closing hands focus back here, and a browser that dropped the event (or never
+     * sent one, as with storage blocked in a private window) gets the same result a
+     * moment later instead of never.
+     */
+    window.addEventListener('focus', syncHistoryFromStorage);
 
     function renderHistoryEntries(historyEntries, persist = false) {
         if (!Array.isArray(historyEntries) || historyEntries.length === 0) return;
@@ -2089,6 +2158,10 @@ ${buildDeleteChatDialogHtml()}
         }
         if (persist) {
             appendChatHistory(sessionId, role, String(text));
+            // This window has just written what it is already showing. Without this,
+            // the next sync would read its own message back as news from elsewhere
+            // and redraw the list underneath the user.
+            rememberRenderedHistory();
         }
         if (scroll) {
             // If an assistant or system message was just added, scroll to the last user message so the user sees their own question above the reply.
