@@ -24,7 +24,25 @@
  */
 export const CHAT_OPEN_STATE_KEY = 'nrAiForm_chatOpen';
 
-/** Record the chat's open state for any window opened from here after this point. */
+/**
+ * Whether the chat was open in this window the last time it said.
+ *
+ * Selecting a value in a Posse form posts the page back and rebuilds the widget from
+ * scratch, so without this a chat the user had open closes itself several times while
+ * they work through a step - which reads as the assistant quitting on them.
+ *
+ * A popup has no record of its own on its first load and reads its opener's, which is
+ * the same answer either way: the chat was open where the user last was.
+ */
+export function wasChatOpenHere() {
+    try {
+        return sessionStorage.getItem(CHAT_OPEN_STATE_KEY) === '1';
+    } catch {
+        return false;
+    }
+}
+
+/** Record the chat's open state, for this window's next load and for any popup. */
 export function saveChatOpenState(isOpen) {
     try {
         sessionStorage.setItem(CHAT_OPEN_STATE_KEY, isOpen ? '1' : '0');

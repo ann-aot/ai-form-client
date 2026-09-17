@@ -21,9 +21,12 @@ import { buildLauncherHtml, createLauncher } from './launcher/ui/launcher.js';
 import { FORM_OVERLAY_STYLES } from './form-overlay/styles/formOverlayStyles.js';
 import { showFormOverlay, hideFormOverlay } from './form-overlay/ui/formOverlay.js';
 import { PRODUCT_NAME } from './shared/productName.js';
-import { isPopupWindow, saveChatOpenState, wasParentChatOpen } from './shared/windowContext.js';
+import { isPopupWindow, saveChatOpenState, wasChatOpenHere, wasParentChatOpen } from './shared/windowContext.js';
 import { POPUP_CALLOUT_STYLES } from './popup-callout/styles/popupCalloutStyles.js';
 import { buildPopupCalloutHtml, createPopupCallout, POPUP_LAUNCHER_NOTICE } from './popup-callout/ui/popupCallout.js';
+import { announceToOpener, watchForOpenPopups } from './shared/popupPresence.js';
+import { POPUP_BLOCK_STYLES } from './popup-block/styles/popupBlockStyles.js';
+import { buildPopupBlockHtml, createPopupBlock } from './popup-block/ui/popupBlock.js';
 
 /**
  * Allow testing of alternative javascript
@@ -1098,6 +1101,8 @@ function injectStyles() {
 
         ${POPUP_CALLOUT_STYLES}
 
+        ${POPUP_BLOCK_STYLES}
+
         .wp-chat-modal {
             display: none;
             position: fixed;
@@ -1474,6 +1479,7 @@ ${buildPopupCalloutHtml()}
                 </button>
             </div>
 ${buildDeleteChatDialogHtml()}
+${buildPopupBlockHtml()}
         </div>
     `;
     document.body.appendChild(container);
@@ -1494,16 +1500,19 @@ ${buildDeleteChatDialogHtml()}
     const guidedQuestionsContainer = document.getElementById('wp-chat-guided-questions');
 
     /**
-     * Whether this window is a popup whose opener had the chat open.
+     * What the chat was doing when this window last had a say.
      *
-     * Read here, before saveChatOpenState() below overwrites it. The widget is
-     * rebuilt closed on every postback, so the recorded state has to be reset to that
-     * truth each time - otherwise a popup opened after a postback would inherit
-     * "open" from a chat the user had already closed.
+     * Two questions off one record. A postback rebuilds the widget from scratch, so a
+     * window has to be told what it was showing a moment ago; and a popup inherits its
+     * opener's copy of that record as it is created, which is what tells it the form
+     * window was mid-conversation.
+     *
+     * Both are read before anything opens or closes the chat, since doing either
+     * rewrites the record.
      */
     const isPopup = isPopupWindow();
     const parentChatWasOpen = isPopup && wasParentChatOpen();
-    saveChatOpenState(false);
+    const chatWasOpenHere = wasChatOpenHere();
 
     let sessionId = getStoredThreadId();
     let restoredScrollTop = loadChatScrollPosition(sessionId);
@@ -1547,6 +1556,14 @@ ${buildDeleteChatDialogHtml()}
     // the window bigger. Shown only by the branches below; building it is not
     // showing it.
     const popupCallout = createPopupCallout({ root: chatModal });
+
+    // Puts the assistant out of use while a sub-form popup is open, both ways in:
+    // the chat itself, and the launcher that would otherwise reopen it.
+    const popupBlock = createPopupBlock({
+        modal: chatModal,
+        launcher: chatLauncher,
+        button: chatButton
+    });
 
     const deleteChatDialog = createDeleteChatDialog({
         root: chatModal,
@@ -1919,16 +1936,38 @@ ${buildDeleteChatDialogHtml()}
     });
 
     /**
-     * A popup continues the conversation the form window started.
+     * Reopen whatever the user had open.
      *
-     * Opened while the user had the chat open, this window opens it too and says so,
-     * because nothing else in a fresh browser window suggests the history survived.
-     * Focus stays where the user put it. When the form window's chat was closed
-     * nothing opens here either - the launcher carries the same message instead.
+     * A postback is not the user closing the chat, so the chat should not come back
+     * closed - selecting a value in a dropdown reloads the page underneath them, and
+     * an assistant that vanishes each time reads as one that has quit.
+     *
+     * The same line covers a popup whose opener was mid-conversation, because a popup
+     * starts from its opener's record: either way the answer is "the chat was open
+     * where this user last was". In a popup, openChat() also brings up the banner
+     * explaining that the conversation carried over; when the form window's chat was
+     * closed, nothing opens and the launcher carries that message instead.
+     *
+     * Focus is left where the form put it. The user is working in the form, and a
+     * reload is not a request to start typing at the assistant.
      */
-    if (parentChatWasOpen && !chatModal.classList.contains('open')) {
+    if ((chatWasOpenHere || parentChatWasOpen) && !chatModal.classList.contains('open')) {
         openChat({ focusInput: false });
     }
+
+    /**
+     * Follow the form's own blocking.
+     *
+     * Posse freezes the fields behind a popup, and the assistant floating over them
+     * has to freeze with them - otherwise it keeps taking questions, and offering to
+     * fill in, a form the user cannot currently act on.
+     *
+     * Every window does both halves: it tells its own opener that it exists, and
+     * watches for popups opened from itself. A sub-form can open a sub-form, and the
+     * window in the middle is then as blocked as the one below it.
+     */
+    if (isPopup) announceToOpener();
+    watchForOpenPopups((anyPopupOpen) => popupBlock.setBlocked(anyPopupOpen));
 
     chatButton.addEventListener('click', toggleChat);
     closeBtn.addEventListener('click', toggleChat);
