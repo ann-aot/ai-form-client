@@ -1614,19 +1614,7 @@ ${buildPopupBlockHtml()}
     const TOOLTIP_FLIP_ABOVE_PX = 180;
 
     /**
-     * Let the user move the assistant off whatever it is covering.
-     *
-     * The corner is the right place until a sub-form opens: those windows are around
-     * 700px wide, and the panel then sits on top of most of the form it is there to
-     * help with. Both boxes remember where they were put, so a postback does not
-     * shuffle them back to the corner mid-step.
-     *
-     * The two are moved independently on purpose. They are never on screen at the
-     * same time - opening the chat hides the launcher - so tying them together would
-     * mean a position chosen for one deciding where the other lands.
-     */
-    /**
-     * Which window's positions these are.
+     * Which window's position this is.
      *
      * A popup inherits its opener's sessionStorage as it is created, so without this
      * a panel moved to the middle of a maximised form window reappears in the middle
@@ -1640,9 +1628,27 @@ ${buildPopupBlockHtml()}
      */
     const dragScope = isPopup ? 'popup' : 'form';
 
+    /**
+     * Let the user move the assistant off whatever it is covering.
+     *
+     * The corner is the right place until a sub-form opens: those windows are around
+     * 700px wide, and the panel then sits on top of most of the form it is there to
+     * help with. The position is remembered, so a postback does not shuffle the
+     * assistant back to the corner mid-step.
+     *
+     * Both boxes take the same slot, so they read as one thing that has been put
+     * somewhere rather than two that happen to move. The panel opens from the corner
+     * its button was left at, and the button comes back to the corner the panel was
+     * closed from. Only one of them is ever on screen, so sharing a position can
+     * never put them on top of each other.
+     *
+     * Where the panel will not fit at that corner it is clamped for the showing and
+     * the stored corner is left as the user set it - so the launcher still returns to
+     * its own spot rather than inheriting a compromise made for a much larger box.
+     */
     const launcherDrag = createDraggable({
         element: chatLauncher,
-        id: `${dragScope}Launcher`,
+        id: dragScope,
         onMove: (rect) => {
             chatLauncher.classList.toggle(
                 'wp-chat-launcher-flipped',
@@ -1653,7 +1659,7 @@ ${buildPopupBlockHtml()}
 
     const modalDrag = createDraggable({
         element: chatModal,
-        id: `${dragScope}Modal`,
+        id: dragScope,
         isHandle: (event) => {
             // Paused: every child is inert and pointer-events: none, so the press
             // lands on the modal itself and the whole panel becomes the handle.

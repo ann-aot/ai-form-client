@@ -5,10 +5,16 @@
  * is not: a Posse sub-form opens in a window around 700px wide, and a 420px panel
  * over that covers most of the form it is meant to be helping with.
  *
- * Dragging writes inline `left`/`top` and releases the `bottom`/`right` the
- * stylesheet pins things by. That is the whole mechanism - no transforms, because a
- * transformed ancestor turns every `position: fixed` descendant into a containing
- * block of its own, which would quietly re-anchor the tooltip and the menus.
+ * Dragging writes inline `right`/`bottom` - the same corner the stylesheet already
+ * pins everything by, just at a distance the user chose. That is the whole mechanism
+ * - no transforms, because a transformed ancestor turns every `position: fixed`
+ * descendant into a containing block of its own, which would quietly re-anchor the
+ * tooltip and the menus.
+ *
+ * The panel and the launcher are meant to share one position, so that the panel
+ * opens where its button was and the button returns where the panel was. They are
+ * different sizes, so what they can share is the corner, not a coordinate - which is
+ * the other reason this measures from the bottom-right.
  */
 
 /**
@@ -18,8 +24,9 @@
  * posts back on nearly every interaction and rebuilds the widget from scratch, so a
  * position held in memory would snap back to the corner several times per step.
  *
- * One key holding both boxes rather than a key each - they are read and written
- * together, and a single parse keeps them from disagreeing.
+ * One key, holding a slot per window the assistant can be in. The panel and the
+ * launcher share a slot, so it is also how one of them learns that the other has
+ * been moved since it was last on screen.
  */
 export const WIDGET_POSITIONS_KEY = 'nrAiForm_widgetPositions';
 
@@ -116,9 +123,9 @@ function writePosition(id, position) {
 function readPosition(id) {
     const stored = readPositions()[id];
     if (!stored || typeof stored !== 'object') return null;
-    const { left, top } = stored;
-    if (!Number.isFinite(left) || !Number.isFinite(top)) return null;
-    return { left, top };
+    const { right, bottom } = stored;
+    if (!Number.isFinite(right) || !Number.isFinite(bottom)) return null;
+    return { right, bottom };
 }
 
 /**
@@ -143,42 +150,49 @@ export function createDraggable({ element, id, isHandle = () => true, onMove = n
     let captured = false;
     let startX = 0;
     let startY = 0;
-    let grabOffsetX = 0;
-    let grabOffsetY = 0;
+    let grabOffsetRight = 0;
+    let grabOffsetBottom = 0;
     let position = readPosition(id);
 
     /**
      * Pull a position back inside the viewport.
      *
-     * Load-bearing in more places than a window resize. A popup inherits its opener's
-     * sessionStorage as it is created, so a position chosen in a maximised window
-     * arrives in a 700px sub-form window pointing off-screen; expanding the chat
-     * grows it downward from a `top` that suited the smaller box; and a phone
-     * rotating changes both axes at once.
+     * Load-bearing in more places than a window resize. The corner is chosen against
+     * whichever box was on screen at the time, so a corner that suits the launcher
+     * can put most of the panel past the top of the window; expanding the chat makes
+     * it taller against a corner chosen when it was not; and a phone rotating changes
+     * both axes at once.
+     *
+     * Only what is shown is clamped - never what is stored. A corner the panel could
+     * not honour is still the corner the user picked, and the launcher, which fits
+     * almost anywhere, should go back to it rather than inherit the compromise.
      */
-    function clampToViewport(left, top) {
+    function clampToViewport(right, bottom) {
         const rect = element.getBoundingClientRect();
-        const maxLeft = Math.max(EDGE_MARGIN, window.innerWidth - rect.width - EDGE_MARGIN);
-        const maxTop = Math.max(EDGE_MARGIN, window.innerHeight - rect.height - EDGE_MARGIN);
+        const maxRight = Math.max(EDGE_MARGIN, window.innerWidth - rect.width - EDGE_MARGIN);
+        const maxBottom = Math.max(EDGE_MARGIN, window.innerHeight - rect.height - EDGE_MARGIN);
         return {
-            left: Math.min(Math.max(left, EDGE_MARGIN), maxLeft),
-            top: Math.min(Math.max(top, EDGE_MARGIN), maxTop)
+            right: Math.min(Math.max(right, EDGE_MARGIN), maxRight),
+            bottom: Math.min(Math.max(bottom, EDGE_MARGIN), maxBottom)
         };
     }
 
     /**
-     * Anchor the box to its own top-left.
+     * Move the box by the corner the stylesheet already anchors it from.
      *
-     * `right` and `bottom` are cleared rather than left to be overridden. With a
-     * width the stylesheet declares `!important` and all four offsets set, the box is
-     * over-constrained, and which edge wins is a CSS tie-break that also flips with
-     * writing direction - not something to rest a layout on.
+     * Offsets from the bottom-right, not a top-left coordinate, and that choice does
+     * three jobs. It is the same anchoring the stylesheet uses, so a dragged box and
+     * an untouched one are described the same way. It keeps the box against the
+     * corner when the window is resized, rather than stranding it mid-screen. And it
+     * is what lets the panel and the launcher share one position: they are different
+     * sizes, so they agree on a corner or they agree on nothing.
+     *
+     * `left` and `top` are left alone - the stylesheet never sets them, so they stay
+     * `auto` and the box is never over-constrained.
      */
     function applyPosition(next) {
-        element.style.left = `${next.left}px`;
-        element.style.top = `${next.top}px`;
-        element.style.right = 'auto';
-        element.style.bottom = 'auto';
+        element.style.right = `${next.right}px`;
+        element.style.bottom = `${next.bottom}px`;
         if (onMove) onMove(element.getBoundingClientRect());
     }
 
@@ -203,10 +217,13 @@ export function createDraggable({ element, id, isHandle = () => true, onMove = n
             clearPosition();
             return;
         }
+        // Re-read rather than trust the copy in hand: the panel and the launcher
+        // share one slot, so the other one may have moved it since. Not while a drag
+        // is in flight, which is the one time this copy is the newer of the two.
+        if (!dragging) position = readPosition(id) || position;
         if (!position) return;
         if (!element.getClientRects().length) return;
-        position = clampToViewport(position.left, position.top);
-        applyPosition(position);
+        applyPosition(clampToViewport(position.right, position.bottom));
     }
 
     function onPointerMove(event) {
@@ -244,7 +261,10 @@ export function createDraggable({ element, id, isHandle = () => true, onMove = n
             }
         }
 
-        position = clampToViewport(event.clientX - grabOffsetX, event.clientY - grabOffsetY);
+        position = clampToViewport(
+            window.innerWidth - (event.clientX + grabOffsetRight),
+            window.innerHeight - (event.clientY + grabOffsetBottom)
+        );
         applyPosition(position);
     }
 
@@ -285,8 +305,9 @@ export function createDraggable({ element, id, isHandle = () => true, onMove = n
         dragging = false;
         startX = event.clientX;
         startY = event.clientY;
-        grabOffsetX = event.clientX - rect.left;
-        grabOffsetY = event.clientY - rect.top;
+        // Held from the bottom-right corner, to match how the box is positioned.
+        grabOffsetRight = rect.right - event.clientX;
+        grabOffsetBottom = rect.bottom - event.clientY;
 
         // On the window rather than the element, because no capture is held yet:
         // the few pixels before this becomes a drag may well land outside the box.
