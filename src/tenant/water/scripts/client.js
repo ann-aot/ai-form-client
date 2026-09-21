@@ -1646,6 +1646,18 @@ ${buildPopupBlockHtml()}
         renderHistoryEntries(existingHistory, false);
     }
 
+    // DEBUG - remove when the popup sync issue is found
+    const dbgWindow = isPopup ? 'POPUP' : 'FORM';
+    const dbg = (...a) => console.log(`[AIFA ${dbgWindow}]`, ...a);
+    const dbgState = (when) => dbg(when, {
+        paused: document.getElementById('wp-chat-messages')?.hasAttribute('inert'),
+        popupsOpen: (window.__aifaOpenPopups || new Set()).size,
+        bubbles: document.querySelectorAll('.wp-chat-message').length,
+        stored: loadChatHistory(sessionId).length,
+        thread: sessionId
+    });
+    dbg('init', { thread: sessionId, restored: existingHistory.length });
+
     initWebSocket(sessionId);
     restoreConversationHistoryFromBackend(existingHistory.length > 0);
 
@@ -1670,7 +1682,8 @@ ${buildPopupBlockHtml()}
     function syncHistoryFromStorage() {
         const history = loadChatHistory(sessionId);
         const historyJson = JSON.stringify(history);
-        if (historyJson === renderedHistoryJson) return;
+        if (historyJson === renderedHistoryJson) { dbg('sync: no change'); return; } // DEBUG
+        dbg('sync: REDRAWING', { to: history.length }); // DEBUG
         renderedHistoryJson = historyJson;
 
         // Someone reading back through the conversation should stay where they were;
@@ -1692,6 +1705,7 @@ ${buildPopupBlockHtml()}
     window.addEventListener('storage', (event) => {
         // A null key means the whole store was cleared; anything else is only our
         // business when it is this thread's history.
+        dbg('storage event', { key: event.key, watching: getHistoryStorageKey(sessionId), matched: event.key === null || event.key === getHistoryStorageKey(sessionId) }); // DEBUG
         if (event.key !== null && event.key !== getHistoryStorageKey(sessionId)) return;
         syncHistoryFromStorage();
     });
@@ -1702,7 +1716,11 @@ ${buildPopupBlockHtml()}
      * sent one, as with storage blocked in a private window) gets the same result a
      * moment later instead of never.
      */
-    window.addEventListener('focus', syncHistoryFromStorage);
+    window.addEventListener('focus', () => { // DEBUG wrapper
+        dbgState('focus');
+        syncHistoryFromStorage();
+        setTimeout(() => dbgState('focus + 2s'), 2000);
+    });
 
     function renderHistoryEntries(historyEntries, persist = false) {
         if (!Array.isArray(historyEntries) || historyEntries.length === 0) return;
@@ -1967,7 +1985,10 @@ ${buildPopupBlockHtml()}
      * window in the middle is then as blocked as the one below it.
      */
     if (isPopup) announceToOpener();
-    watchForOpenPopups((anyPopupOpen) => popupBlock.setBlocked(anyPopupOpen));
+    watchForOpenPopups((anyPopupOpen) => { // DEBUG wrapper
+        dbg(anyPopupOpen ? 'PAUSING' : 'UN-PAUSING', new Date().toLocaleTimeString());
+        popupBlock.setBlocked(anyPopupOpen);
+    });
 
     chatButton.addEventListener('click', toggleChat);
     closeBtn.addEventListener('click', toggleChat);
@@ -2197,6 +2218,7 @@ ${buildPopupBlockHtml()}
         }
         if (persist) {
             appendChatHistory(sessionId, role, String(text));
+            dbg('wrote', { role, key: getHistoryStorageKey(sessionId) }); // DEBUG
             // This window has just written what it is already showing. Without this,
             // the next sync would read its own message back as news from elsewhere
             // and redraw the list underneath the user.
