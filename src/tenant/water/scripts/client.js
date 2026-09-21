@@ -18,6 +18,8 @@ import { buildDeleteChatDialogHtml, createDeleteChatDialog } from './header-menu
 import { buildExpandToggleHtml, createExpandToggle } from './header-menu/ui/expandToggle.js';
 import { LAUNCHER_STYLES } from './launcher/styles/launcherStyles.js';
 import { buildLauncherHtml, createLauncher } from './launcher/ui/launcher.js';
+import { DRAG_STYLES } from './drag/styles/dragStyles.js';
+import { createDraggable } from './drag/ui/draggable.js';
 import { FORM_OVERLAY_STYLES } from './form-overlay/styles/formOverlayStyles.js';
 import { showFormOverlay, hideFormOverlay } from './form-overlay/ui/formOverlay.js';
 import { PRODUCT_NAME } from './shared/productName.js';
@@ -1141,6 +1143,8 @@ function injectStyles() {
 
         ${POPUP_BLOCK_STYLES}
 
+        ${DRAG_STYLES}
+
         .wp-chat-modal {
             display: none;
             position: fixed;
@@ -1604,6 +1608,52 @@ ${buildPopupBlockHtml()}
         setLauncherMessage: (text) => launcher.setMessage(text)
     });
 
+    // How close to the top the launcher may sit before its message has to hang below
+    // it instead of above. Roughly the tallest the bubble gets at its fixed width.
+    const TOOLTIP_FLIP_ABOVE_PX = 180;
+
+    /**
+     * Let the user move the assistant off whatever it is covering.
+     *
+     * The corner is the right place until a sub-form opens: those windows are around
+     * 700px wide, and the panel then sits on top of most of the form it is there to
+     * help with. Both boxes remember where they were put, so a postback does not
+     * shuffle them back to the corner mid-step.
+     *
+     * The two are moved independently on purpose. They are never on screen at the
+     * same time - opening the chat hides the launcher - so tying them together would
+     * mean a position chosen for one deciding where the other lands.
+     */
+    const launcherDrag = createDraggable({
+        element: chatLauncher,
+        id: 'launcher',
+        onMove: (rect) => {
+            chatLauncher.classList.toggle(
+                'wp-chat-launcher-flipped',
+                rect.top < TOOLTIP_FLIP_ABOVE_PX
+            );
+        }
+    });
+
+    const modalDrag = createDraggable({
+        element: chatModal,
+        id: 'modal',
+        isHandle: (event) => {
+            // Paused: every child is inert and pointer-events: none, so the press
+            // lands on the modal itself and the whole panel becomes the handle.
+            // Moving it aside to read the form underneath is the one thing left
+            // worth doing with it.
+            if (chatModal.classList.contains('wp-chat-modal-blocked')) return true;
+
+            const target = event.target;
+            if (!(target instanceof Element)) return false;
+            // The header carries the expand, menu and close controls. A press on one
+            // of those is aimed at the control, not at the window around it.
+            if (target.closest('button, a, input, textarea, select')) return false;
+            return Boolean(target.closest('.wp-chat-header'));
+        }
+    });
+
     const deleteChatDialog = createDeleteChatDialog({
         root: chatModal,
         onConfirm: deleteChat
@@ -2003,6 +2053,10 @@ ${buildPopupBlockHtml()}
     function openChat({ focusInput = true } = {}) {
         chatModal.classList.add('open');
         chatLauncher.style.display = 'none';
+        // The panel has been display: none until now, so it had no size to be
+        // clamped against - this is the first moment its saved position can be
+        // checked against the window it is actually opening into.
+        modalDrag.refresh();
         requestAnimationFrame(restoreChatScrollPosition);
         refreshGuidedQuestions();
         saveChatOpenState(true);
@@ -2020,6 +2074,8 @@ ${buildPopupBlockHtml()}
     function closeChat() {
         chatModal.classList.remove('open');
         chatLauncher.style.display = 'flex';
+        // Same again for the launcher, which was the hidden one until this moment.
+        launcherDrag.refresh();
         saveChatOpenState(false);
     }
 
