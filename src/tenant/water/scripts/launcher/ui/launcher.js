@@ -84,17 +84,20 @@ export function buildLauncherHtml(content = LAUNCHER_CONTENT) {
  * @param {object} [options.content] - the content object the launcher was built from
  * @param {{ text: string, seenKey: string }} [options.notice] - message to show in
  *   place of the first-visit one, under its own seen-key, with the asterisk
- * @returns {{ hideTooltip: () => void, hideNotice: () => void }}
+ * @returns {{ hideTooltip: () => void, hideNotice: () => void, setMessage: (text: string|null) => void }}
  */
 export function createLauncher({ root, content = LAUNCHER_CONTENT, notice = null }) {
     const tooltip = root ? root.querySelector('#wp-chat-launcher-tooltip') : null;
     const badge = root ? root.querySelector('#wp-chat-launcher-badge') : null;
-    if (!tooltip) return { hideTooltip: () => {}, hideNotice: () => {} };
+    if (!tooltip) return { hideTooltip: () => {}, hideNotice: () => {}, setMessage: () => {} };
 
     const tooltipBody = tooltip.querySelector('.wp-chat-launcher-tooltip-body');
     const message = notice ? notice.text : content.tooltip;
     const seenKey = notice ? notice.seenKey : LAUNCHER_TOOLTIP_SEEN_KEY;
     if (notice && tooltipBody) tooltipBody.textContent = message;
+
+    // Whether something is currently saying the bubble should read otherwise.
+    let overriding = false;
 
     // Anything that counts as the user getting on with their work.
     const DISMISS_EVENTS = ['scroll', 'click', 'keydown', 'touchstart', 'wheel', 'pointerdown'];
@@ -121,12 +124,38 @@ export function createLauncher({ root, content = LAUNCHER_CONTENT, notice = null
         hideTooltip();
     }
 
+    /**
+     * Say something else for as long as it is true, then put the message back.
+     *
+     * The launcher's own message invites a click, so it is the wrong thing to be
+     * offering while the button is out of use - and `disabled` does not silence it,
+     * because the message is revealed by hovering the wrapper rather than the button.
+     *
+     * Only the wording changes here. Whether the bubble is showing, and whether hover
+     * brings it back, stays the launcher's business; a caller saying what it should
+     * read while something holds is not saying when it should appear.
+     *
+     * @param {string|null} text - the message to show, or null to restore the usual one
+     */
+    function setMessage(text) {
+        if (!tooltipBody) return;
+        if (text) {
+            tooltipBody.textContent = text;
+            overriding = true;
+        } else if (overriding) {
+            // Restored from the value captured at build time, never read back off the
+            // element, so one override cannot become what the next one restores.
+            tooltipBody.textContent = message;
+            overriding = false;
+        }
+    }
+
     // The asterisk is shown even where the message is not: a user returning after a
     // postback has already had the message dismissed out from under them.
     if (notice && badge) badge.hidden = false;
 
     if (!shouldShowTooltip(seenKey)) {
-        return { hideTooltip, hideNotice };
+        return { hideTooltip, hideNotice, setMessage };
     }
 
     tooltip.hidden = false;
@@ -134,5 +163,5 @@ export function createLauncher({ root, content = LAUNCHER_CONTENT, notice = null
         document.addEventListener(eventName, hideTooltip, { capture: true, passive: true });
     });
 
-    return { hideTooltip, hideNotice };
+    return { hideTooltip, hideNotice, setMessage };
 }

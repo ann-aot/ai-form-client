@@ -42,10 +42,18 @@ export function buildPopupBlockHtml(content = POPUP_BLOCK_CONTENT) {
  * @param {HTMLElement} options.modal - the chat modal
  * @param {HTMLElement} options.launcher - the launcher wrapper
  * @param {HTMLButtonElement} options.button - the launcher button
+ * @param {(text: string|null) => void} [options.setLauncherMessage] - the launcher's
+ *   setMessage, so the reason can be said where the launcher already speaks
  * @param {object} [options.content]
  * @returns {{ setBlocked: (blocked: boolean) => void }}
  */
-export function createPopupBlock({ modal, launcher, button, content = POPUP_BLOCK_CONTENT }) {
+export function createPopupBlock({
+    modal,
+    launcher,
+    button,
+    setLauncherMessage = null,
+    content = POPUP_BLOCK_CONTENT
+}) {
     const overlay = modal ? modal.querySelector('#wp-chat-blocked') : null;
 
     /**
@@ -76,6 +84,15 @@ export function createPopupBlock({ modal, launcher, button, content = POPUP_BLOC
             else button.removeAttribute('title');
         }
         if (launcher) launcher.classList.toggle('wp-chat-launcher-blocked', blocked);
+
+        /**
+         * The launcher's own message invites a click, and it goes on offering one
+         * while the button is dead: it is revealed by hovering the wrapper, which
+         * `disabled` has no say over. So the reason is put where that message was,
+         * rather than left to the native tooltip above - which several browsers do
+         * not show on a disabled control at all.
+         */
+        if (setLauncherMessage) setLauncherMessage(blocked ? content.launcherTitle : null);
     }
 
     return { setBlocked };

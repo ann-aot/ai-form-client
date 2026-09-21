@@ -1600,7 +1600,8 @@ ${buildPopupBlockHtml()}
     const popupBlock = createPopupBlock({
         modal: chatModal,
         launcher: chatLauncher,
-        button: chatButton
+        button: chatButton,
+        setLauncherMessage: (text) => launcher.setMessage(text)
     });
 
     const deleteChatDialog = createDeleteChatDialog({
