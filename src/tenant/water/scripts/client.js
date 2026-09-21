@@ -270,12 +270,23 @@ function createFallbackThreadId() {
     return `session-${randomHex}`;
 }
 
-function getStoredThreadId() {
+/**
+ * The shared thread id as stored, or null.
+ *
+ * Separate from getStoredThreadId() because minting an id is the wrong answer for a
+ * window asking "which conversation is current?" - it would answer a cleared store
+ * by inventing a thread nobody else is on.
+ */
+function readStoredThreadId() {
     try {
-        return localStorage.getItem(THREAD_ID_STORAGE_KEY) || createFallbackThreadId();
+        return localStorage.getItem(THREAD_ID_STORAGE_KEY);
     } catch {
-        return createFallbackThreadId();
+        return null;
     }
+}
+
+function getStoredThreadId() {
+    return readStoredThreadId() || createFallbackThreadId();
 }
 
 function saveThreadId(threadId) {
@@ -398,18 +409,45 @@ function migrateChatScrollPosition(oldThreadId, newThreadId) {
     }
 }
 
+/**
+ * A thread id with the orchestrator's tenant namespace taken off.
+ *
+ * The orchestrator reports a thread as "<clientId>:<sessionId>". That composite is
+ * its own lookup key, not a session id this client can use: adopted as a window's
+ * thread id it silently moves the conversation to a storage key the other window is
+ * not watching, and sends the tenant twice in the history URL, which is built as
+ * /tenants/<clientId>/history/<threadId>.
+ *
+ * Fallback rather than the rule - see extractThreadIdFromResponse - because the
+ * prefix is the backend's format and not ours to depend on.
+ */
+function stripThreadNamespace(threadId) {
+    if (typeof threadId !== 'string' || !threadId) return null;
+    const prefix = `${clientId}:`;
+    return threadId.startsWith(prefix) ? threadId.slice(prefix.length) : threadId;
+}
+
+/**
+ * The session this response belongs to.
+ *
+ * A reply says so twice: `session_id` at the top level, and a namespaced `thread_id`
+ * inside the body. The top-level field wins because it is the one the backend labels
+ * as the session, it is what the session_init path already adopts, and it needs no
+ * assumptions about how a thread id is composed.
+ */
 function extractThreadIdFromResponse(response) {
     if (!response) return null;
-    if (typeof response.thread_id === 'string') return response.thread_id;
+    if (typeof response.session_id === 'string' && response.session_id) return response.session_id;
+    if (typeof response.thread_id === 'string') return stripThreadNamespace(response.thread_id);
 
     const body = response.response;
     if (!body) return null;
 
     if (Array.isArray(body)) {
         const threadObj = body.find((item) => item && typeof item.thread_id === 'string');
-        return threadObj ? threadObj.thread_id : null;
+        return threadObj ? stripThreadNamespace(threadObj.thread_id) : null;
     }
-    if (typeof body.thread_id === 'string') return body.thread_id;
+    if (typeof body.thread_id === 'string') return stripThreadNamespace(body.thread_id);
     return null;
 }
 
@@ -1646,18 +1684,6 @@ ${buildPopupBlockHtml()}
         renderHistoryEntries(existingHistory, false);
     }
 
-    // DEBUG - remove when the popup sync issue is found
-    const dbgWindow = isPopup ? 'POPUP' : 'FORM';
-    const dbg = (...a) => console.log(`[AIFA ${dbgWindow}]`, ...a);
-    const dbgState = (when) => dbg(when, {
-        paused: document.getElementById('wp-chat-messages')?.hasAttribute('inert'),
-        popupsOpen: (window.__aifaOpenPopups || new Set()).size,
-        bubbles: document.querySelectorAll('.wp-chat-message').length,
-        stored: loadChatHistory(sessionId).length,
-        thread: sessionId
-    });
-    dbg('init', { thread: sessionId, restored: existingHistory.length });
-
     initWebSocket(sessionId);
     restoreConversationHistoryFromBackend(existingHistory.length > 0);
 
@@ -1666,25 +1692,21 @@ ${buildPopupBlockHtml()}
     }
 
     /**
-     * Redraw the message list if another window has added to the conversation.
-     *
-     * The popups and the form window share one thread, so a question asked in a
-     * popup belongs to the conversation the form window is showing - but that window
-     * has no reason to know it happened, and until now only a page reload brought it
-     * in. Both windows run this, so it works in either direction.
+     * Rebuild the message list from what is stored for the current thread.
      *
      * A full redraw rather than appending the difference: every message on screen is
      * persisted as it is added, so storage is the whole truth about what should be
      * displayed, and rebuilding from it cannot drift the way a merge can. The typing
      * indicator and the guided-question list live outside the message nodes, so they
      * are left alone.
+     *
+     * Unconditional, which is what adopting a new thread needs - there the stored
+     * conversation can happen to match what is on screen and still be a different
+     * conversation. Callers reacting to a change use syncHistoryFromStorage().
      */
-    function syncHistoryFromStorage() {
+    function redrawFromStorage() {
         const history = loadChatHistory(sessionId);
-        const historyJson = JSON.stringify(history);
-        if (historyJson === renderedHistoryJson) { dbg('sync: no change'); return; } // DEBUG
-        dbg('sync: REDRAWING', { to: history.length }); // DEBUG
-        renderedHistoryJson = historyJson;
+        renderedHistoryJson = JSON.stringify(history);
 
         // Someone reading back through the conversation should stay where they were;
         // someone at the live end should be carried along by what just arrived.
@@ -1699,13 +1721,67 @@ ${buildPopupBlockHtml()}
     }
 
     /**
+     * Redraw if another window has added to the conversation.
+     *
+     * The popups and the form window share one thread, so a question asked in a
+     * popup belongs to the conversation the form window is showing - but that window
+     * has no reason to know it happened, and until now only a page reload brought it
+     * in. Both windows run this, so it works in either direction.
+     */
+    function syncHistoryFromStorage() {
+        const historyJson = JSON.stringify(loadChatHistory(sessionId));
+        if (historyJson === renderedHistoryJson) return;
+        redrawFromStorage();
+    }
+
+    /**
+     * Move this window onto the thread the shared store now names.
+     *
+     * The thread id lives in localStorage and is shared; `sessionId` is a copy taken
+     * once when this window started. Nothing used to update that copy, so a window
+     * that did not reload went on watching a conversation nobody was writing to -
+     * which is why closing a sub-form directly left the form window behind it empty,
+     * while saving it (a reload, and so a fresh copy) looked fine.
+     *
+     * Returns whether the thread moved, so the caller can redraw on the new one.
+     */
+    function adoptSharedThreadIdIfChanged() {
+        const sharedThreadId = readStoredThreadId();
+        if (!sharedThreadId || sharedThreadId === sessionId) return false;
+
+        // A reply still in flight belongs to the thread being left behind, and
+        // initWebSocket() below drops the old socket's handlers - the only paths that
+        // clear the loading state. Retire it here or the typing dots never stop.
+        chatGeneration += 1;
+        requestInFlight = false;
+        showTyping(false);
+
+        sessionId = sharedThreadId;
+        restoredScrollTop = loadChatScrollPosition(sessionId);
+        // The socket is bound to the id it was opened with, so it has to follow too -
+        // otherwise this window keeps talking into the conversation it just left.
+        initWebSocket(sessionId);
+        refreshGuidedQuestions();
+        return true;
+    }
+
+    /**
      * localStorage fires this only in the *other* windows, which is exactly the set
      * that needs to redraw - the window that sent the message already has it.
      */
     window.addEventListener('storage', (event) => {
+        // The thread id moving is news in its own right: the conversation this window
+        // should be showing is now under a different key, and this is the one notice
+        // it gets. Ignoring it is what made a reload the only way to recover.
+        if (event.key === null || event.key === THREAD_ID_STORAGE_KEY) {
+            if (adoptSharedThreadIdIfChanged()) {
+                redrawFromStorage();
+                return;
+            }
+        }
+
         // A null key means the whole store was cleared; anything else is only our
         // business when it is this thread's history.
-        dbg('storage event', { key: event.key, watching: getHistoryStorageKey(sessionId), matched: event.key === null || event.key === getHistoryStorageKey(sessionId) }); // DEBUG
         if (event.key !== null && event.key !== getHistoryStorageKey(sessionId)) return;
         syncHistoryFromStorage();
     });
@@ -1716,10 +1792,12 @@ ${buildPopupBlockHtml()}
      * sent one, as with storage blocked in a private window) gets the same result a
      * moment later instead of never.
      */
-    window.addEventListener('focus', () => { // DEBUG wrapper
-        dbgState('focus');
-        syncHistoryFromStorage();
-        setTimeout(() => dbgState('focus + 2s'), 2000);
+    window.addEventListener('focus', () => {
+        // Getting focus back is a sub-form handing over, and the cheapest moment to
+        // ask both questions a reload would have answered: which thread is current,
+        // and has it moved on since this window last drew it.
+        if (adoptSharedThreadIdIfChanged()) redrawFromStorage();
+        else syncHistoryFromStorage();
     });
 
     function renderHistoryEntries(historyEntries, persist = false) {
@@ -1985,10 +2063,7 @@ ${buildPopupBlockHtml()}
      * window in the middle is then as blocked as the one below it.
      */
     if (isPopup) announceToOpener();
-    watchForOpenPopups((anyPopupOpen) => { // DEBUG wrapper
-        dbg(anyPopupOpen ? 'PAUSING' : 'UN-PAUSING', new Date().toLocaleTimeString());
-        popupBlock.setBlocked(anyPopupOpen);
-    });
+    watchForOpenPopups((anyPopupOpen) => popupBlock.setBlocked(anyPopupOpen));
 
     chatButton.addEventListener('click', toggleChat);
     closeBtn.addEventListener('click', toggleChat);
@@ -2218,7 +2293,6 @@ ${buildPopupBlockHtml()}
         }
         if (persist) {
             appendChatHistory(sessionId, role, String(text));
-            dbg('wrote', { role, key: getHistoryStorageKey(sessionId) }); // DEBUG
             // This window has just written what it is already showing. Without this,
             // the next sync would read its own message back as news from elsewhere
             // and redraw the list underneath the user.
