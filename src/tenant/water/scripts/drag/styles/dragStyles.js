@@ -37,7 +37,47 @@ export const DRAG_STYLES = `
             touch-action: none;
         }
 
-        /* 2. During a drag ------------------------------------------------------
+        /* 2. Saying so ----------------------------------------------------------
+           A move cursor is only found by someone already hovering the right strip,
+           which is no use to a user looking for a way to uncover the form. The grip
+           is the standard sign for "this moves", and it sits in the header because
+           that is the part that moves it. */
+        .wp-chat-drag-grip {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            fill: currentColor;
+            /* Present, not loud. It shares the header's white, so full strength
+               would read as another control competing with the title. */
+            opacity: 0.55;
+        }
+
+        .wp-chat-header:hover .wp-chat-drag-grip {
+            opacity: 0.9;
+        }
+
+        /* The launcher's own hint, under the message in its bubble. Quieter than the
+           message above it - it answers a question the user has only once. */
+        .wp-chat-launcher-tooltip-text,
+        .wp-chat-launcher-tooltip-hint {
+            display: block;
+        }
+
+        .wp-chat-launcher-tooltip-hint {
+            margin-top: 4px;
+            color: #55504A;
+            font-size: 13px;
+            line-height: 18px;
+        }
+
+        /* Withdrawn while paused, where it would be an instruction the user cannot
+           follow: the launcher is disabled then, and a disabled button hands out no
+           pointer events for a drag to start from. */
+        .wp-chat-launcher-blocked .wp-chat-launcher-tooltip-hint {
+            display: none;
+        }
+
+        /* 3. During a drag ------------------------------------------------------
            The pointer sweeps across the host page's form while dragging, and without
            this every field it crosses offers an I-beam and starts selecting text.
            The blanket !important is scoped to a class that exists only between
@@ -54,7 +94,7 @@ export const DRAG_STYLES = `
             -webkit-user-select: none !important;
         }
 
-        /* 3. Tooltip flip -------------------------------------------------------
+        /* 4. Tooltip flip -------------------------------------------------------
            The launcher's message grows upward from a bottom-anchored box, so once
            the launcher is dragged near the top of the window the message would be
            off-screen. Flipping the wrapper puts it below the button instead.

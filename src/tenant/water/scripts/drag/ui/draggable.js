@@ -47,6 +47,48 @@ const COMPACT_VIEWPORT_QUERY = '(max-width: 480px)';
 /** Class worn by the document while a drag is in progress. */
 const DRAGGING_CLASS = 'wp-drag-active';
 
+/**
+ * The click a finished drag is about to produce, waiting to be eaten.
+ *
+ * Module-level, and deliberately not per-draggable. Every box shares one window, and
+ * an armed swallower is armed against every click in it - so the panel's drag could
+ * eat the launcher's click, which is precisely the bug of a chat that will not open
+ * after the window has been moved.
+ */
+let pendingSwallow = null;
+
+function disarmClickSwallow() {
+    if (!pendingSwallow) return;
+    window.removeEventListener('click', pendingSwallow.onClick, true);
+    window.removeEventListener('pointerdown', pendingSwallow.onPointerDown, true);
+    pendingSwallow = null;
+}
+
+/**
+ * Eat the click this gesture is about to produce, and nothing else.
+ *
+ * The launcher's whole surface is a button, so letting that click through would open
+ * the chat every time the user moved it.
+ *
+ * The pointerdown half is the safety catch. A drag does not always end in a click -
+ * release the pointer outside the window, or let the browser cancel the gesture, and
+ * none arrives - which would leave this armed and waiting to eat the user's next
+ * real click instead. The next press on anything at all stands it down.
+ */
+function armClickSwallow() {
+    disarmClickSwallow();
+    pendingSwallow = {
+        onClick: (event) => {
+            event.stopPropagation();
+            event.preventDefault();
+            disarmClickSwallow();
+        },
+        onPointerDown: () => disarmClickSwallow()
+    };
+    window.addEventListener('click', pendingSwallow.onClick, true);
+    window.addEventListener('pointerdown', pendingSwallow.onPointerDown, true);
+}
+
 function readPositions() {
     try {
         const raw = sessionStorage.getItem(WIDGET_POSITIONS_KEY);
@@ -98,12 +140,12 @@ export function createDraggable({ element, id, isHandle = () => true, onMove = n
 
     let pointerId = null;
     let dragging = false;
+    let captured = false;
     let startX = 0;
     let startY = 0;
     let grabOffsetX = 0;
     let grabOffsetY = 0;
     let position = readPosition(id);
-    let swallowClick = null;
 
     /**
      * Pull a position back inside the viewport.
@@ -177,6 +219,29 @@ export function createDraggable({ element, id, isHandle = () => true, onMove = n
             if (!travelled) return;
             dragging = true;
             document.body.classList.add(DRAGGING_CLASS);
+
+            /**
+             * Capture is taken here, at the moment this becomes a drag - never on
+             * the press itself.
+             *
+             * Capturing a pointer retargets its compatibility mouse events too, so a
+             * capture held from pointerdown makes the following `click` land on
+             * whatever holds the capture. For the launcher that is the wrapper, not
+             * the button inside it, and a click dispatched at the wrapper never
+             * reaches the button's own listener - the chat simply stops opening.
+             *
+             * Once the gesture is a drag its click is being thrown away regardless,
+             * so there is nothing left for capture to break, and it earns its keep:
+             * it keeps the moves coming when the pointer runs over an iframe or off
+             * the edge of the window.
+             */
+            try {
+                element.setPointerCapture(pointerId);
+                captured = true;
+            } catch {
+                // Without capture the drag still follows the pointer through the
+                // window-level listeners; it just gives up at an iframe's edge.
+            }
         }
 
         position = clampToViewport(event.clientX - grabOffsetX, event.clientY - grabOffsetY);
@@ -186,45 +251,29 @@ export function createDraggable({ element, id, isHandle = () => true, onMove = n
     function onPointerUp(event) {
         if (event.pointerId !== pointerId) return;
 
-        element.removeEventListener('pointermove', onPointerMove);
-        element.removeEventListener('pointerup', onPointerUp);
-        element.removeEventListener('pointercancel', onPointerUp);
-        try {
-            element.releasePointerCapture(pointerId);
-        } catch {
-            // Capture already gone - the pointer left the window, or the browser took
-            // it back. Nothing here depends on releasing it cleanly.
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+        window.removeEventListener('pointercancel', onPointerUp);
+        if (captured) {
+            try {
+                element.releasePointerCapture(pointerId);
+            } catch {
+                // Capture already gone - the pointer left the window, or the browser
+                // took it back. Nothing here depends on releasing it cleanly.
+            }
+            captured = false;
         }
         pointerId = null;
 
+        // A press that never travelled is a click, and is left alone to be one.
         if (!dragging) return;
         dragging = false;
         document.body.classList.remove(DRAGGING_CLASS);
         writePosition(id, position);
-
-        /**
-         * Eat the click this gesture is about to produce.
-         *
-         * The launcher's whole surface is a button, so letting that click through
-         * would open the chat every time the user moved it. Capture phase on the
-         * window, so it never reaches the button's own listener.
-         */
-        swallowClick = (clickEvent) => {
-            clickEvent.stopPropagation();
-            clickEvent.preventDefault();
-            swallowClick = null;
-        };
-        window.addEventListener('click', swallowClick, { capture: true, once: true });
+        armClickSwallow();
     }
 
     function onPointerDown(event) {
-        // A drag that produced no click - a touch drag, mostly - would otherwise
-        // leave the swallower armed and eat the user's next real click instead.
-        if (swallowClick) {
-            window.removeEventListener('click', swallowClick, { capture: true });
-            swallowClick = null;
-        }
-
         if (compact.matches) return;
         // Primary button only: a right-click is asking for a context menu.
         if (event.button !== 0) return;
@@ -239,15 +288,11 @@ export function createDraggable({ element, id, isHandle = () => true, onMove = n
         grabOffsetX = event.clientX - rect.left;
         grabOffsetY = event.clientY - rect.top;
 
-        try {
-            element.setPointerCapture(pointerId);
-        } catch {
-            // Without capture the drag still works while the pointer stays over the
-            // element, which is the common case; it just stops if it runs off.
-        }
-        element.addEventListener('pointermove', onPointerMove);
-        element.addEventListener('pointerup', onPointerUp);
-        element.addEventListener('pointercancel', onPointerUp);
+        // On the window rather than the element, because no capture is held yet:
+        // the few pixels before this becomes a drag may well land outside the box.
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
+        window.addEventListener('pointercancel', onPointerUp);
     }
 
     element.addEventListener('pointerdown', onPointerDown);

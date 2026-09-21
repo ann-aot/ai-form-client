@@ -1489,8 +1489,9 @@ function initBot() {
     container.innerHTML = `
 ${buildLauncherHtml()}
         <div class="wp-chat-modal" id="wp-chat-modal">
-            <div class="wp-chat-header">
+            <div class="wp-chat-header" title="Drag to move">
                 <div class="wp-chat-title">
+                    <svg class="wp-chat-drag-grip" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 4a2 2 0 110 4 2 2 0 010-4zm6 0a2 2 0 110 4 2 2 0 010-4zM9 10a2 2 0 110 4 2 2 0 010-4zm6 0a2 2 0 110 4 2 2 0 010-4zM9 16a2 2 0 110 4 2 2 0 010-4zm6 0a2 2 0 110 4 2 2 0 010-4z"/></svg>
                     <span>${PRODUCT_NAME}</span>
                 </div>
                 <div class="wp-chat-header-actions">${buildExpandToggleHtml()}${buildHeaderMenuHtml(menuItems)}
@@ -1624,9 +1625,24 @@ ${buildPopupBlockHtml()}
      * same time - opening the chat hides the launcher - so tying them together would
      * mean a position chosen for one deciding where the other lands.
      */
+    /**
+     * Which window's positions these are.
+     *
+     * A popup inherits its opener's sessionStorage as it is created, so without this
+     * a panel moved to the middle of a maximised form window reappears in the middle
+     * of a 700px sub-form window - clamped on-screen, but nowhere the user put it and
+     * nowhere it belongs. The two windows are different shapes with different things
+     * worth avoiding, so a placement in one is not an instruction for the other.
+     *
+     * Scoping the key rather than clearing it on arrival is what lets a popup keep
+     * its own placement across its postbacks: the form window never writes this slot,
+     * so a popup starts from the corner and stays where the user then puts it.
+     */
+    const dragScope = isPopup ? 'popup' : 'form';
+
     const launcherDrag = createDraggable({
         element: chatLauncher,
-        id: 'launcher',
+        id: `${dragScope}Launcher`,
         onMove: (rect) => {
             chatLauncher.classList.toggle(
                 'wp-chat-launcher-flipped',
@@ -1637,7 +1653,7 @@ ${buildPopupBlockHtml()}
 
     const modalDrag = createDraggable({
         element: chatModal,
-        id: 'modal',
+        id: `${dragScope}Modal`,
         isHandle: (event) => {
             // Paused: every child is inert and pointer-events: none, so the press
             // lands on the modal itself and the whole panel becomes the handle.

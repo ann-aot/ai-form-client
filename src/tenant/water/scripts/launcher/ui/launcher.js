@@ -19,7 +19,14 @@ export const LAUNCHER_TOOLTIP_SEEN_KEY = 'nrAiForm_launcherTooltipSeen';
 
 export const LAUNCHER_CONTENT = {
     label: PRODUCT_NAME,
-    tooltip: 'Select the icon at any time for help with your application.'
+    tooltip: 'Select the icon at any time for help with your application.',
+    /**
+     * Said quietly under the message, because dragging is not what this button is
+     * for - it is what to do when the button is in the way. It sits in the bubble
+     * rather than on a native tooltip so it cannot fight the bubble for the same
+     * hover, and it is second so a user who only reads the first line loses nothing.
+     */
+    dragHint: 'Drag to move it out of the way.'
 };
 
 function escapeHtml(value) {
@@ -60,7 +67,7 @@ export function buildLauncherHtml(content = LAUNCHER_CONTENT) {
     return `
         <div class="wp-chat-launcher" id="wp-chat-launcher">
             <div class="wp-chat-launcher-tooltip" id="wp-chat-launcher-tooltip" role="status" hidden>
-                <div class="wp-chat-launcher-tooltip-body">${escapeHtml(content.tooltip)}</div>
+                <div class="wp-chat-launcher-tooltip-body"><span class="wp-chat-launcher-tooltip-text">${escapeHtml(content.tooltip)}</span><span class="wp-chat-launcher-tooltip-hint">${escapeHtml(content.dragHint)}</span></div>
                 <span class="wp-chat-launcher-tooltip-arrow"></span>
             </div>
             <button class="wp-chat-button" id="wp-chat-button" type="button"><span class="wp-chat-button-label">${escapeHtml(content.label)}</span><span class="wp-chat-launcher-badge" id="wp-chat-launcher-badge" aria-hidden="true" hidden>*</span></button>
@@ -91,7 +98,9 @@ export function createLauncher({ root, content = LAUNCHER_CONTENT, notice = null
     const badge = root ? root.querySelector('#wp-chat-launcher-badge') : null;
     if (!tooltip) return { hideTooltip: () => {}, hideNotice: () => {}, setMessage: () => {} };
 
-    const tooltipBody = tooltip.querySelector('.wp-chat-launcher-tooltip-body');
+    // The message's own line, not the whole bubble: the drag hint is a sibling
+    // inside it, and rewriting the bubble's text would take the hint with it.
+    const tooltipBody = tooltip.querySelector('.wp-chat-launcher-tooltip-text');
     const message = notice ? notice.text : content.tooltip;
     const seenKey = notice ? notice.seenKey : LAUNCHER_TOOLTIP_SEEN_KEY;
     if (notice && tooltipBody) tooltipBody.textContent = message;
