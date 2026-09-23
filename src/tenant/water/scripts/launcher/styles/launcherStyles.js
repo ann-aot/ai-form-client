@@ -107,7 +107,10 @@ export const LAUNCHER_STYLES = `
         }
 
         .wp-chat-launcher-tooltip-body {
-            padding: 8px 12px;
+            position: relative;
+            /* Room on the right for the dismiss button, which is lifted out of the
+               flow so it cannot push the message into a second line. */
+            padding: 8px 36px 8px 12px;
             background: #FFFFFF;
             border-radius: 2px;
             color: #313132;
@@ -117,6 +120,55 @@ export const LAUNCHER_STYLES = `
             line-height: 22px;
             text-align: left;
             box-sizing: border-box;
+        }
+
+        /* Dismiss ---------------------------------------------------------------
+           The only part of the bubble that takes the pointer. The bubble itself is
+           pointer-events: none so it can never block the form it overlaps, and that
+           has to keep being true of everything except this 24px square. */
+        .wp-chat-launcher-tooltip-dismiss {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            background: none;
+            border: none;
+            border-radius: 50%;
+            color: #6B655D;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+
+        .wp-chat-launcher-tooltip-dismiss:hover {
+            background: rgba(45, 42, 38, 0.08);
+            color: #2D2A26;
+        }
+
+        .wp-chat-launcher-tooltip-dismiss:focus-visible {
+            outline: 2px solid #003366;
+            outline-offset: 1px;
+        }
+
+        .wp-chat-launcher-tooltip-dismiss-icon {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
+        /* Withheld from a bubble that is only being borrowed.
+           The rule above brings the message back under the pointer after its showing
+           is over; there is nothing to dismiss about a bubble that already leaves the
+           moment the pointer does, and offering to close it would suggest the closing
+           meant something. Keeping it out of the rendering also keeps it out of the
+           tab order, so it cannot be reached when it cannot be seen. */
+        .wp-chat-launcher-tooltip[hidden] .wp-chat-launcher-tooltip-dismiss {
+            display: none;
         }
 
         /* The beak is a rotated square whose top half is covered by the body above

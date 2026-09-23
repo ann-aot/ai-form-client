@@ -1554,6 +1554,25 @@ ${buildPopupBlockHtml()}
      * rewrites the record.
      */
     const isPopup = isPopupWindow();
+
+    /**
+     * Which window's preferences these are - its size, and where it sits.
+     *
+     * A popup inherits its opener's sessionStorage as it is created, so anything the
+     * user chose in the form window arrives in the sub-form window as if they had
+     * chosen it there. That is right for the conversation, which is the same
+     * conversation, and wrong for everything about the window: a panel moved to the
+     * middle of a maximised form window reappears in the middle of a 700px sub-form
+     * window, and a size chosen to fill a large screen fills a small one entirely.
+     * The two windows are different shapes with different things worth avoiding, so a
+     * choice made in one is not an instruction for the other.
+     *
+     * Scoping the keys rather than clearing them on arrival is what lets a popup keep
+     * its own choices across its own postbacks: the form window never writes the
+     * popup's keys, so a popup starts from the defaults and holds what it is then
+     * given.
+     */
+    const windowScope = isPopup ? 'popup' : 'form';
     const parentChatWasOpen = isPopup && wasParentChatOpen();
     const chatWasOpenHere = wasChatOpenHere();
 
@@ -1582,9 +1601,15 @@ ${buildPopupBlockHtml()}
         }
     });
 
-    // The window keeps whatever size the user chose for as long as the page lives,
-    // including across close/reopen, so nothing here needs the returned handle.
-    createExpandToggle({ root: chatModal, modal: chatModal });
+    // The window keeps whatever size the user chose - across close and reopen, and
+    // across the postbacks that rebuild this widget as they work through a step - so
+    // nothing here needs the returned handle. The scope keeps a sub-form window from
+    // opening at a size chosen for the form window behind it.
+    createExpandToggle({
+        root: chatModal,
+        modal: chatModal,
+        scope: windowScope
+    });
 
     // Shows the first-visit helper message and retires it on the first interaction.
     // In a popup opened from a closed chat there is something more useful to say, so
@@ -1614,21 +1639,6 @@ ${buildPopupBlockHtml()}
     const TOOLTIP_FLIP_ABOVE_PX = 180;
 
     /**
-     * Which window's position this is.
-     *
-     * A popup inherits its opener's sessionStorage as it is created, so without this
-     * a panel moved to the middle of a maximised form window reappears in the middle
-     * of a 700px sub-form window - clamped on-screen, but nowhere the user put it and
-     * nowhere it belongs. The two windows are different shapes with different things
-     * worth avoiding, so a placement in one is not an instruction for the other.
-     *
-     * Scoping the key rather than clearing it on arrival is what lets a popup keep
-     * its own placement across its postbacks: the form window never writes this slot,
-     * so a popup starts from the corner and stays where the user then puts it.
-     */
-    const dragScope = isPopup ? 'popup' : 'form';
-
-    /**
      * Let the user move the assistant off whatever it is covering.
      *
      * The corner is the right place until a sub-form opens: those windows are around
@@ -1648,7 +1658,14 @@ ${buildPopupBlockHtml()}
      */
     const launcherDrag = createDraggable({
         element: chatLauncher,
-        id: dragScope,
+        id: windowScope,
+        isHandle: (event) => {
+            const target = event.target;
+            if (!(target instanceof Element)) return true;
+            // Everything here is somewhere to grab except the message's dismiss
+            // button, which is aimed at the message rather than at the launcher.
+            return !target.closest('.wp-chat-launcher-tooltip-dismiss');
+        },
         onMove: (rect) => {
             chatLauncher.classList.toggle(
                 'wp-chat-launcher-flipped',
@@ -1659,7 +1676,7 @@ ${buildPopupBlockHtml()}
 
     const modalDrag = createDraggable({
         element: chatModal,
-        id: dragScope,
+        id: windowScope,
         isHandle: (event) => {
             // Paused: every child is inert and pointer-events: none, so the press
             // lands on the modal itself and the whole panel becomes the handle.

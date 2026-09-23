@@ -26,8 +26,13 @@ export const LAUNCHER_CONTENT = {
      * rather than on a native tooltip so it cannot fight the bubble for the same
      * hover, and it is second so a user who only reads the first line loses nothing.
      */
-    dragHint: 'Drag to move it out of the way.'
+    dragHint: 'Drag to move it out of the way.',
+    dismissLabel: 'Dismiss this message'
 };
+
+// Material close - the same X the popup banner dismisses with, so the two ways out
+// of the same message look like the same control.
+const DISMISS_ICON = `<svg class="wp-chat-launcher-tooltip-dismiss-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
 
 function escapeHtml(value) {
     return String(value ?? '')
@@ -67,7 +72,7 @@ export function buildLauncherHtml(content = LAUNCHER_CONTENT) {
     return `
         <div class="wp-chat-launcher" id="wp-chat-launcher">
             <div class="wp-chat-launcher-tooltip" id="wp-chat-launcher-tooltip" role="status" hidden>
-                <div class="wp-chat-launcher-tooltip-body"><span class="wp-chat-launcher-tooltip-text">${escapeHtml(content.tooltip)}</span><span class="wp-chat-launcher-tooltip-hint">${escapeHtml(content.dragHint)}</span></div>
+                <div class="wp-chat-launcher-tooltip-body"><span class="wp-chat-launcher-tooltip-text">${escapeHtml(content.tooltip)}</span><span class="wp-chat-launcher-tooltip-hint">${escapeHtml(content.dragHint)}</span><button class="wp-chat-launcher-tooltip-dismiss" id="wp-chat-launcher-tooltip-dismiss" type="button" aria-label="${escapeHtml(content.dismissLabel)}" title="${escapeHtml(content.dismissLabel)}">${DISMISS_ICON}</button></div>
                 <span class="wp-chat-launcher-tooltip-arrow"></span>
             </div>
             <button class="wp-chat-button" id="wp-chat-button" type="button"><span class="wp-chat-button-label">${escapeHtml(content.label)}</span><span class="wp-chat-launcher-badge" id="wp-chat-launcher-badge" aria-hidden="true" hidden>*</span></button>
@@ -101,6 +106,7 @@ export function createLauncher({ root, content = LAUNCHER_CONTENT, notice = null
     // The message's own line, not the whole bubble: the drag hint is a sibling
     // inside it, and rewriting the bubble's text would take the hint with it.
     const tooltipBody = tooltip.querySelector('.wp-chat-launcher-tooltip-text');
+    const dismissButton = tooltip.querySelector('#wp-chat-launcher-tooltip-dismiss');
     const message = notice ? notice.text : content.tooltip;
     const seenKey = notice ? notice.seenKey : LAUNCHER_TOOLTIP_SEEN_KEY;
     if (notice && tooltipBody) tooltipBody.textContent = message;
@@ -157,6 +163,26 @@ export function createLauncher({ root, content = LAUNCHER_CONTENT, notice = null
             tooltipBody.textContent = message;
             overriding = false;
         }
+    }
+
+    /**
+     * A way out that the user chooses, rather than one that happens to them.
+     *
+     * The message already steps aside at the first sign of activity, so this button
+     * changes no outcome - it changes who decided. A message with no visible way to
+     * close it reads as something stuck there, which is the opposite of what a note
+     * offering help should feel like.
+     *
+     * The click almost always arrives after the fact: the dismissal listeners above
+     * watch `pointerdown` on the document, so the bubble is usually gone before this
+     * fires at all. Wired anyway, because the button working must not depend on the
+     * contents of that list.
+     *
+     * The asterisk is left alone. Dismissing the message is not the same as having
+     * opened the chat, and the asterisk is what still says there is something here.
+     */
+    if (dismissButton) {
+        dismissButton.addEventListener('click', hideTooltip);
     }
 
     // The asterisk is shown even where the message is not: a user returning after a
