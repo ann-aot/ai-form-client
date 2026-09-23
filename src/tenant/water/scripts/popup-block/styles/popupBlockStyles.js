@@ -60,6 +60,6 @@ export const POPUP_BLOCK_STYLES = `
         }
 
         .wp-chat-button:disabled:hover {
-            background: #00528D;
+            background: #FAF9F8;
         }
 `;

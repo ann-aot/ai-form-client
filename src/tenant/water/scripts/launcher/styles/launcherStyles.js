@@ -19,15 +19,21 @@ export const LAUNCHER_STYLES = `
         }
 
         /* 2. Button -------------------------------------------------------------
-           Width hugs the label rather than being fixed: the design's 125px predates
-           the full product name, which does not fit in it at 16px bold. */
+           Width hugs the label rather than being fixed: 12px of padding either side
+           of "How can I help?" at 16px bold comes to the design's 150px on its own,
+           and a fixed width would clip the label wherever BC Sans is not available.
+           Height falls out the same way - 12 + 22 + 12 = the specified 46px.
+
+           The card is near-white rather than blue: it sits over the form all the way
+           down the page, and the shadow is what separates it, not a block of colour. */
         .wp-chat-button {
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 12px 16px;
-            background: #00528D;
-            color: #FFFFFF;
+            gap: 4px;
+            padding: 12px;
+            background: #FAF9F8;
+            color: #013366;
             border: none;
             border-radius: 12px;
             font-family: inherit;
@@ -43,28 +49,29 @@ export const LAUNCHER_STYLES = `
         }
 
         .wp-chat-button:hover {
-            background: #3470B1;
+            background: #EDEBE9;
         }
 
         /* Focus is called out separately from hover: keyboard users need the same
-           "this is interactive" signal that pointer users get. */
+           "this is interactive" signal that pointer users get. The ring is drawn
+           inside the button, in the label's own blue - on a near-white card an
+           outward ring would read as a second border against the page. */
         .wp-chat-button:focus-visible {
-            outline: 3px solid #FFFFFF;
-            outline-offset: -6px;
-            background: #3470B1;
+            outline: 2px solid #013366;
+            outline-offset: -4px;
+            background: #EDEBE9;
         }
 
         /* Notice marker ---------------------------------------------------------
            Inline beside the label rather than absolutely positioned in the corner:
            the button's width hugs its text, so a corner badge would sit half outside
-           the rounded edge and clip. Raised by align-self instead of by superscript
-           so it cannot alter the button's line height.
+           the rounded edge and clip. Spaced by the button's own 4px gap, and raised by
+           align-self instead of by superscript so it cannot alter the line height.
 
            aria-hidden in the markup, because the asterisk is not information on its
            own - the message it marks is announced by the tooltip's role="status". */
         .wp-chat-launcher-badge {
             align-self: flex-start;
-            margin-left: 4px;
             color: #CE3E39;
             font-size: 18px;
             font-weight: 700;

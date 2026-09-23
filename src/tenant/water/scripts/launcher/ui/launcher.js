@@ -5,7 +5,6 @@
  * discoverable, and gets out of the way the moment the user does anything at all -
  * the point is to be noticed, not to be dismissed.
  */
-import { PRODUCT_NAME } from '../../shared/productName.js';
 
 /**
  * Marks the helper message as already shown.
@@ -18,7 +17,13 @@ import { PRODUCT_NAME } from '../../shared/productName.js';
 export const LAUNCHER_TOOLTIP_SEEN_KEY = 'nrAiForm_launcherTooltipSeen';
 
 export const LAUNCHER_CONTENT = {
-    label: PRODUCT_NAME,
+    /**
+     * An offer, not a product name. The button is the only part of the assistant a
+     * user sees before opening it, so it reads as the question they would ask rather
+     * than the name of the thing that answers - the name is introduced inside, where
+     * there is room to say what it is. PRODUCT_NAME is deliberately not used here.
+     */
+    label: 'How can I help?',
     tooltip: 'Select the icon at any time for help with your application.',
     /**
      * Said quietly under the message, because dragging is not what this button is
