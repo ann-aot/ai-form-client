@@ -62,61 +62,6 @@ export const LAUNCHER_STYLES = `
             background: #EDEBE9;
         }
 
-        /* Close -----------------------------------------------------------------
-           The bar is only a box to hang the X off. It is sized by the button inside
-           it, and the X is taken out of the flow, so the card keeps the 150 x 46 the
-           design gives it however long the label gets.
-
-           Cornered and overlapping rather than sitting inside the card: the card is
-           the width of its label and nothing else, and an X placed within it would
-           either push the label along or sit on top of it. */
-        .wp-chat-launcher-bar {
-            position: relative;
-            display: flex;
-        }
-
-        /* Always drawn, never on hover only. It is the way out of something pinned
-           over the user's form, which a touch user has no way to hover for - and a
-           control that appears only once the pointer is already there is no answer
-           to "how do I get rid of this". 24px square for the same reason: it is the
-           smallest comfortable target, whatever it is being pressed with. */
-        .wp-chat-launcher-close {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 24px;
-            height: 24px;
-            padding: 0;
-            background: #FFFFFF;
-            color: #013366;
-            /* The card underneath is near-white too, so the ring is what separates
-               them - without it the X reads as a hole in the corner. */
-            border: 1px solid #D7D3CF;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0.6px 1.8px rgba(0, 0, 0, 0.10);
-            transition: background 0.15s ease, border-color 0.15s ease;
-        }
-
-        .wp-chat-launcher-close:hover {
-            background: #EDEBE9;
-            border-color: #013366;
-        }
-
-        .wp-chat-launcher-close:focus-visible {
-            outline: 2px solid #013366;
-            outline-offset: 1px;
-        }
-
-        .wp-chat-launcher-close-icon {
-            width: 12px;
-            height: 12px;
-            fill: currentColor;
-        }
-
         /* Notice marker ---------------------------------------------------------
            Inline beside the label rather than absolutely positioned in the corner:
            the button's width hugs its text, so a corner badge would sit half outside
@@ -168,9 +113,10 @@ export const LAUNCHER_STYLES = `
             display: block;
         }
 
-        /* - but not to the pointer that just retired it.
-           Clicking the launcher hides the bubble while the pointer is still on the
-           launcher, and the rule above would hand it straight back in the same frame.
+        /* - but not to the pointer that just closed it.
+           The dismiss button is inside the launcher, so the pointer is still hovering
+           at the moment the bubble goes away, and the rule above would hand it back
+           in the same frame: the X would look broken rather than the bubble closed.
            Same specificity as that rule and placed after it, so it wins while the
            class is set. JS clears the class when the pointer leaves, so hovering back
            later still borrows the message in the usual way. */
@@ -181,7 +127,9 @@ export const LAUNCHER_STYLES = `
 
         .wp-chat-launcher-tooltip-body {
             position: relative;
-            padding: 8px 12px;
+            /* Room on the right for the dismiss button, which is lifted out of the
+               flow so it cannot push the message into a second line. */
+            padding: 8px 36px 8px 12px;
             background: #FFFFFF;
             border-radius: 2px;
             color: #313132;
@@ -191,6 +139,55 @@ export const LAUNCHER_STYLES = `
             line-height: 22px;
             text-align: left;
             box-sizing: border-box;
+        }
+
+        /* Dismiss ---------------------------------------------------------------
+           The only part of the bubble that takes the pointer. The bubble itself is
+           pointer-events: none so it can never block the form it overlaps, and that
+           has to keep being true of everything except this 24px square. */
+        .wp-chat-launcher-tooltip-dismiss {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            background: none;
+            border: none;
+            border-radius: 50%;
+            color: #6B655D;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+
+        .wp-chat-launcher-tooltip-dismiss:hover {
+            background: rgba(45, 42, 38, 0.08);
+            color: #2D2A26;
+        }
+
+        .wp-chat-launcher-tooltip-dismiss:focus-visible {
+            outline: 2px solid #003366;
+            outline-offset: 1px;
+        }
+
+        .wp-chat-launcher-tooltip-dismiss-icon {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
+        /* Withheld from a bubble that is only being borrowed.
+           The rule above brings the message back under the pointer after its showing
+           is over; there is nothing to dismiss about a bubble that already leaves the
+           moment the pointer does, and offering to close it would suggest the closing
+           meant something. Keeping it out of the rendering also keeps it out of the
+           tab order, so it cannot be reached when it cannot be seen. */
+        .wp-chat-launcher-tooltip[hidden] .wp-chat-launcher-tooltip-dismiss {
+            display: none;
         }
 
         /* The beak is a rotated square whose top half is covered by the body above

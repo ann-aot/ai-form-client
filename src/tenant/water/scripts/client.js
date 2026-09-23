@@ -1662,9 +1662,9 @@ ${buildPopupBlockHtml()}
         isHandle: (event) => {
             const target = event.target;
             if (!(target instanceof Element)) return true;
-            // Everything here is somewhere to grab except the close button, which
-            // is aimed at the launcher rather than at where the launcher sits.
-            return !target.closest('.wp-chat-launcher-close');
+            // Everything here is somewhere to grab except the message's dismiss
+            // button, which is aimed at the message rather than at the launcher.
+            return !target.closest('.wp-chat-launcher-tooltip-dismiss');
         },
         onMove: (rect) => {
             chatLauncher.classList.toggle(
@@ -2092,10 +2092,6 @@ ${buildPopupBlockHtml()}
     function openChat({ focusInput = true } = {}) {
         chatModal.classList.add('open');
         chatLauncher.style.display = 'none';
-        // Whatever route brought the user back in, the assistant is plainly wanted -
-        // so a launcher closed earlier is owed back the moment this chat is closed.
-        // This is what stops closing the launcher being a door with no handle.
-        launcher.clearHidden();
         // The panel has been display: none until now, so it had no size to be
         // clamped against - this is the first moment its saved position can be
         // checked against the window it is actually opening into.
@@ -2116,11 +2112,7 @@ ${buildPopupBlockHtml()}
 
     function closeChat() {
         chatModal.classList.remove('open');
-        // Not unconditionally shown: the user may have closed the launcher, and a
-        // postback since could have left this the code that puts it back on screen.
-        // openChat() clears that record, so after any visit to the chat this is
-        // 'flex' again.
-        chatLauncher.style.display = launcher.isHidden() ? 'none' : 'flex';
+        chatLauncher.style.display = 'flex';
         // Same again for the launcher, which was the hidden one until this moment.
         launcherDrag.refresh();
         saveChatOpenState(false);
