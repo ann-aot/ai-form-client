@@ -1611,12 +1611,18 @@ ${buildPopupBlockHtml()}
         scope: windowScope
     });
 
-    // Shows the first-visit helper message and retires it on the first interaction.
+    // Shows the first-visit helper message, which now stays until it is answered.
+    // The step is passed in because it is the only thing that tells a postback from a
+    // page turn: the form posts back on nearly every interaction and rebuilds this
+    // widget each time, and the message has to survive that while still ending when
+    // the user moves on.
+    //
     // In a popup opened from a closed chat there is something more useful to say, so
     // the launcher carries that instead, marked with an asterisk: the conversation is
     // still here, and nothing about a fresh browser window suggests it.
     const launcher = createLauncher({
         root: chatLauncher,
+        pageKey: getCurrentFormStepFromDom() || '',
         notice: isPopup && !parentChatWasOpen ? POPUP_LAUNCHER_NOTICE : null
     });
 
@@ -1660,10 +1666,20 @@ ${buildPopupBlockHtml()}
         element: chatLauncher,
         id: windowScope,
         isHandle: (event) => {
+            // Paused for a sub-form popup. The launcher takes the pointer across its
+            // whole wrapper then, so that the message explaining the pause can be
+            // hovered while the button is disabled - but a target widened to be read
+            // is not a target widened to be grabbed, and there is nothing worth
+            // moving a launcher that cannot be opened.
+            if (chatLauncher.classList.contains('wp-chat-launcher-blocked')) return false;
+
             const target = event.target;
             if (!(target instanceof Element)) return true;
-            // Everything here is somewhere to grab except the message's dismiss
-            // button, which is aimed at the message rather than at the launcher.
+            // Only two things here take the pointer at all: the button and the
+            // message's dismiss X. The message and the space around it are
+            // pointer-events: none, so a press over them never reaches this element
+            // and the widget cannot be dragged by its message. That leaves the X,
+            // which is aimed at the message rather than at the launcher.
             return !target.closest('.wp-chat-launcher-tooltip-dismiss');
         },
         onMove: (rect) => {
@@ -2099,6 +2115,14 @@ ${buildPopupBlockHtml()}
         requestAnimationFrame(restoreChatScrollPosition);
         refreshGuidedQuestions();
         saveChatOpenState(true);
+        // The helper message asked the user to do exactly this, so it has nothing
+        // left to say. Said here rather than left to a click listener because there
+        // is no longer any listener retiring it - opening the assistant is one of
+        // the three things that close it, and this is that one. hideNotice() below
+        // covers the popup's own message; this covers the first-visit one, on the
+        // path where the launcher is merely hidden and would otherwise come back
+        // still carrying it when the chat is closed again.
+        launcher.hideTooltip({ suppressHover: false });
         if (isPopup) {
             // The launcher notice asked for exactly this, so it has nothing left to
             // ask; the banner repeats it where the user is now looking, and adds the

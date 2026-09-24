@@ -109,14 +109,5 @@ export const DRAG_STYLES = `
         .wp-chat-launcher-flipped .wp-chat-launcher-tooltip {
             margin-top: 8px;
             margin-bottom: 0;
-            padding-top: 14.3px;
-            padding-bottom: 0;
-        }
-
-        /* Same rotated square, same half of it covered by the body - the body is now
-           below the beak rather than above it, so the beak points up. */
-        .wp-chat-launcher-flipped .wp-chat-launcher-tooltip-arrow {
-            top: 10px;
-            bottom: auto;
         }
 `;
