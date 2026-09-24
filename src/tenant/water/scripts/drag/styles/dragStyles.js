@@ -95,19 +95,23 @@ export const DRAG_STYLES = `
         }
 
         /* 4. Tooltip flip -------------------------------------------------------
-           The launcher's message grows upward from a bottom-anchored box, so once
-           the launcher is dragged near the top of the window the message would be
-           off-screen. Flipping the wrapper puts it below the button instead.
-
-           column-reverse rather than reordering the markup: the tooltip has to stay
-           before the button in the DOM, where it is neither part of the button's
-           accessible name nor in front of it in the tab order. */
-        .wp-chat-launcher-flipped {
-            flex-direction: column-reverse;
-        }
-
+           The message sits above the button, so once the launcher is dragged near the
+           top of the window there is no room left for it. This hangs it below the
+           button instead. Both orientations are absolute offsets against the wrapper,
+           so neither takes space and the button does not move between them. */
         .wp-chat-launcher-flipped .wp-chat-launcher-tooltip {
+            top: 100%;
+            bottom: auto;
             margin-top: 8px;
             margin-bottom: 0;
+        }
+
+        /* The same for the other axis. The message hangs leftward from the button's
+           right edge, and it is wider than the button, so near the left of the window
+           it would run off. This lines its left edge up with the button's and lets it
+           hang rightward instead. */
+        .wp-chat-launcher-near-left .wp-chat-launcher-tooltip {
+            right: auto;
+            left: 0;
         }
 `;

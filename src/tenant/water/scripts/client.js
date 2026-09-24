@@ -1611,11 +1611,9 @@ ${buildPopupBlockHtml()}
         scope: windowScope
     });
 
-    // Shows the first-visit helper message, which now stays until it is answered.
-    // The step is passed in because it is the only thing that tells a postback from a
-    // page turn: the form posts back on nearly every interaction and rebuilds this
-    // widget each time, and the message has to survive that while still ending when
-    // the user moves on.
+    // Shows the helper message, which stays until the user answers it. The step is
+    // passed in because it is what tells a postback from a page turn: the form posts
+    // back on nearly every interaction and rebuilds this widget each time.
     //
     // In a popup opened from a closed chat there is something more useful to say, so
     // the launcher carries that instead, marked with an asterisk: the conversation is
@@ -1644,6 +1642,11 @@ ${buildPopupBlockHtml()}
     // it instead of above. Roughly the tallest the bubble gets at its fixed width.
     const TOOLTIP_FLIP_ABOVE_PX = 180;
 
+    // The same on the horizontal: the bubble's 251px, plus the 8px the drag keeps
+    // between any box and the window edge. Measured from the button's right edge,
+    // which is where the bubble hangs from.
+    const TOOLTIP_FLIP_LEFT_PX = 259;
+
     /**
      * Let the user move the assistant off whatever it is covering.
      *
@@ -1666,26 +1669,30 @@ ${buildPopupBlockHtml()}
         element: chatLauncher,
         id: windowScope,
         isHandle: (event) => {
-            // Paused for a sub-form popup. The launcher takes the pointer across its
-            // whole wrapper then, so that the message explaining the pause can be
-            // hovered while the button is disabled - but a target widened to be read
-            // is not a target widened to be grabbed, and there is nothing worth
-            // moving a launcher that cannot be opened.
+            // Paused for a sub-form popup. The whole wrapper takes the pointer then
+            // so the message explaining the pause can be hovered, but a launcher
+            // that cannot be opened is not worth moving either.
             if (chatLauncher.classList.contains('wp-chat-launcher-blocked')) return false;
 
             const target = event.target;
             if (!(target instanceof Element)) return true;
-            // Only two things here take the pointer at all: the button and the
-            // message's dismiss X. The message and the space around it are
-            // pointer-events: none, so a press over them never reaches this element
-            // and the widget cannot be dragged by its message. That leaves the X,
-            // which is aimed at the message rather than at the launcher.
+            // Only the button and the dismiss X take the pointer here; the message
+            // and the space around it are pointer-events: none, so a press over them
+            // never reaches this element. The X is aimed at the message rather than
+            // at the launcher.
             return !target.closest('.wp-chat-launcher-tooltip-dismiss');
         },
         onMove: (rect) => {
+            // The rect is the button's: the message is positioned out of flow, so it
+            // adds nothing to the wrapper. Both tests therefore ask about the room
+            // around the button, which is what the message has to fit into.
             chatLauncher.classList.toggle(
                 'wp-chat-launcher-flipped',
                 rect.top < TOOLTIP_FLIP_ABOVE_PX
+            );
+            chatLauncher.classList.toggle(
+                'wp-chat-launcher-near-left',
+                rect.right < TOOLTIP_FLIP_LEFT_PX
             );
         }
     });
@@ -2115,13 +2122,11 @@ ${buildPopupBlockHtml()}
         requestAnimationFrame(restoreChatScrollPosition);
         refreshGuidedQuestions();
         saveChatOpenState(true);
-        // The helper message asked the user to do exactly this, so it has nothing
-        // left to say. Said here rather than left to a click listener because there
-        // is no longer any listener retiring it - opening the assistant is one of
-        // the three things that close it, and this is that one. hideNotice() below
-        // covers the popup's own message; this covers the first-visit one, on the
-        // path where the launcher is merely hidden and would otherwise come back
-        // still carrying it when the chat is closed again.
+        // Opening the assistant is one of the three things that close the helper
+        // message. Without this the launcher is only hidden, and would come back
+        // still carrying the message when the chat is closed again. suppressHover is
+        // off because the launcher leaves the screen, so no pointerleave would
+        // arrive to clear the suppression.
         launcher.hideTooltip({ suppressHover: false });
         if (isPopup) {
             // The launcher notice asked for exactly this, so it has nothing left to
