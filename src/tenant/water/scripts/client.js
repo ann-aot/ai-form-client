@@ -1486,6 +1486,7 @@ function initBot() {
     ];
 
     const container = document.createElement('div');
+    container.setAttribute('lang', 'en-CA');
     container.innerHTML = `
 ${buildLauncherHtml()}
         <div class="wp-chat-modal" id="wp-chat-modal">
