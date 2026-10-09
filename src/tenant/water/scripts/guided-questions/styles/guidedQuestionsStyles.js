@@ -24,7 +24,7 @@ export const GUIDED_QUESTIONS_STYLES = `
             align-items: center;
             border: 1px solid #F2F2F2 !important;
             border-radius: 4px !important;
-            background: #F7F8FA !important;
+            background: #FFFFFF !important;
             color: #474D53 !important;
             font: 400 14px/24px 'BCSans', sans-serif !important;
             cursor: pointer;

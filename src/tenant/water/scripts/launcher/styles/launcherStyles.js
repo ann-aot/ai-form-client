@@ -70,24 +70,6 @@ export const LAUNCHER_STYLES = `
             background: #EDEBE9;
         }
 
-        /* Notice marker ---------------------------------------------------------
-           Inline beside the label rather than positioned in the corner: the button's
-           width hugs its text, so a corner badge would clip on the rounded edge.
-           Raised by align-self rather than superscript so it cannot alter the line
-           height. aria-hidden in the markup - the message it marks is announced by
-           the tooltip's role="status". */
-        .wp-chat-launcher-badge {
-            align-self: flex-start;
-            color: #CE3E39;
-            font-size: 18px;
-            font-weight: 700;
-            line-height: 14px;
-        }
-
-        .wp-chat-launcher-badge[hidden] {
-            display: none;
-        }
-
         /* 3. Helper message -----------------------------------------------------
            Out of flow, so the wrapper's box stays the button's and the button does
            not move when the message appears or goes. In flow, with the wrapper
@@ -192,5 +174,17 @@ export const LAUNCHER_STYLES = `
             width: 14px;
             height: 14px;
             fill: currentColor;
+        }
+
+        /* A message borrowed back by hover is already closed, so it has nothing to
+           dismiss. [hidden] is what tells it apart from the first showing: hover
+           overrides the attribute rather than clearing it. Without the X the text
+           takes back the room reserved for it. */
+        .wp-chat-launcher-tooltip[hidden] .wp-chat-launcher-tooltip-dismiss {
+            display: none;
+        }
+
+        .wp-chat-launcher-tooltip[hidden] .wp-chat-launcher-tooltip-body {
+            padding-right: 12px;
         }
 `;

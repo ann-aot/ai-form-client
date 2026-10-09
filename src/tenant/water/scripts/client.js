@@ -1617,8 +1617,8 @@ ${buildPopupBlockHtml()}
     // back on nearly every interaction and rebuilds this widget each time.
     //
     // In a popup opened from a closed chat there is something more useful to say, so
-    // the launcher carries that instead, marked with an asterisk: the conversation is
-    // still here, and nothing about a fresh browser window suggests it.
+    // the launcher carries that instead: the conversation is still here, and nothing
+    // about a fresh browser window suggests it.
     const launcher = createLauncher({
         root: chatLauncher,
         pageKey: getCurrentFormStepFromDom() || '',

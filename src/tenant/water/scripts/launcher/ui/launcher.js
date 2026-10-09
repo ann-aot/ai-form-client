@@ -30,7 +30,7 @@ export const LAUNCHER_CONTENT = {
      * there is room to say what it is, so PRODUCT_NAME is not used here.
      */
     label: 'How can I help?',
-    tooltip: 'Select the icon at any time for help with your application.',
+    tooltip: 'Select the icon anytime for help with your application.',
     /**
      * Sits inside the bubble rather than on a native tooltip, so it cannot compete
      * with the bubble for the same hover. Second, so a user who reads only the first
@@ -116,7 +116,7 @@ export function buildLauncherHtml(content = LAUNCHER_CONTENT) {
             <div class="wp-chat-launcher-tooltip" id="wp-chat-launcher-tooltip" role="status" hidden>
                 <div class="wp-chat-launcher-tooltip-body"><span class="wp-chat-launcher-tooltip-text">${escapeHtml(content.tooltip)}</span><span class="wp-chat-launcher-tooltip-hint">${escapeHtml(content.dragHint)}</span><button class="wp-chat-launcher-tooltip-dismiss" id="wp-chat-launcher-tooltip-dismiss" type="button" aria-label="${escapeHtml(content.dismissLabel)}" title="${escapeHtml(content.dismissLabel)}">${DISMISS_ICON}</button></div>
             </div>
-            <button class="wp-chat-button" id="wp-chat-button" type="button"><span class="wp-chat-button-label">${escapeHtml(content.label)}</span><span class="wp-chat-launcher-badge" id="wp-chat-launcher-badge" aria-hidden="true" hidden>*</span></button>
+            <button class="wp-chat-button" id="wp-chat-button" type="button"><span class="wp-chat-button-label">${escapeHtml(content.label)}</span></button>
         </div>`;
 }
 
@@ -129,20 +129,19 @@ export function buildLauncherHtml(content = LAUNCHER_CONTENT) {
  * for here.
  *
  * A `notice` shows a one-off message in place of the usual one, under its own
- * storage key, and marks the button with an asterisk. It is not queued behind the
- * usual message: both occupy the same spot, and a notice is true only right now.
+ * storage key. It is not queued behind the usual message: both occupy the same
+ * spot, and a notice is true only right now.
  *
  * @param {object} options
  * @param {HTMLElement} options.root - element containing the launcher markup
  * @param {object} [options.content] - the content object the launcher was built from
  * @param {string} [options.pageKey] - identifier for the step of the form on screen
  * @param {{ text: string, seenKey: string }} [options.notice] - message to show in
- *   place of the usual one, under its own seen-key, with the asterisk
+ *   place of the usual one, under its own seen-key
  * @returns {{ hideTooltip: (options?: { suppressHover?: boolean }) => void, hideNotice: () => void, setMessage: (text: string|null) => void }}
  */
 export function createLauncher({ root, content = LAUNCHER_CONTENT, pageKey = '', notice = null }) {
     const tooltip = root ? root.querySelector('#wp-chat-launcher-tooltip') : null;
-    const badge = root ? root.querySelector('#wp-chat-launcher-badge') : null;
     if (!tooltip) return { hideTooltip: () => {}, hideNotice: () => {}, setMessage: () => {} };
 
     // The message's own line, not the whole bubble: the drag hint is a sibling
@@ -186,9 +185,8 @@ export function createLauncher({ root, content = LAUNCHER_CONTENT, pageKey = '',
         tooltip.hidden = true;
     }
 
-    /** Close the notice and clear the asterisk marking it. */
+    /** Close the notice. */
     function hideNotice() {
-        if (badge) badge.hidden = true;
         hideTooltip({ suppressHover: false });
     }
 
@@ -215,8 +213,6 @@ export function createLauncher({ root, content = LAUNCHER_CONTENT, pageKey = '',
 
     // The only way the message closes while the user stays on this step, so it has to
     // work on both showings - the one due this session and the one borrowed by hover.
-    // The asterisk is left alone: dismissing the message is not the same as having
-    // opened the chat.
     if (dismissButton) {
         dismissButton.addEventListener('click', () => {
             // Blurred first: a focused child keeps :focus-within true on the wrapper,
@@ -233,9 +229,6 @@ export function createLauncher({ root, content = LAUNCHER_CONTENT, pageKey = '',
             launcher.classList.remove('wp-chat-launcher-dismissed');
         });
     }
-
-    // Shown whenever a notice is set, whether or not the message itself is due.
-    if (notice && badge) badge.hidden = false;
 
     if (!shouldShowTooltip(seenKey, page)) {
         return { hideTooltip, hideNotice, setMessage };

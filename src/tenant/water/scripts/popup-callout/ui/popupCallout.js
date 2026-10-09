@@ -52,7 +52,7 @@ export const POPUP_CALLOUT_CONTENT = {
 export const POPUP_LAUNCHER_NOTICE_SEEN_KEY = 'nrAiForm_popupLauncherNoticeSeen';
 
 export const POPUP_LAUNCHER_NOTICE = {
-    text: `${POPUP_CALLOUT_CONTENT.message} ${POPUP_CALLOUT_CONTENT.hint}`,
+    text: POPUP_CALLOUT_CONTENT.message,
     seenKey: POPUP_LAUNCHER_NOTICE_SEEN_KEY
 };
 
@@ -91,24 +91,31 @@ function markCalloutDismissed() {
 }
 
 /**
- * Grow the window, clamped so it cannot run off the screen it is on.
+ * Work out how large the window can grow, and where it must sit to do so.
  *
- * Only the space to the right of and below the window's own corner is available to
- * grow into, since resizeTo() keeps that corner fixed. Returns whether the window
- * actually changed size: browsers are inconsistent about honouring this and refuse
- * silently, so the caller checks rather than assumes.
+ * The whole screen counts, not just the space to the right of and below the window:
+ * Posse opens its sub-forms at different sizes and positions, and one opened near the
+ * right or bottom edge had no room past its own corner - so the offer was withheld in
+ * some popups and not others. A window that would overrun the screen edge is moved
+ * back first, since resizeTo() keeps the top-left corner fixed.
  */
 function getGrowthTarget() {
     const widthBefore = window.outerWidth;
     const heightBefore = window.outerHeight;
 
-    const roomRight = (screen.availLeft || 0) + screen.availWidth - window.screenX;
-    const roomBelow = (screen.availTop || 0) + screen.availHeight - window.screenY;
+    const screenLeft = screen.availLeft || 0;
+    const screenTop = screen.availTop || 0;
+    const targetWidth = Math.max(widthBefore, Math.min(PREFERRED_WIDTH, screen.availWidth));
+    const targetHeight = Math.max(heightBefore, Math.min(PREFERRED_HEIGHT, screen.availHeight));
     return {
         widthBefore,
         heightBefore,
-        targetWidth: Math.max(widthBefore, Math.min(PREFERRED_WIDTH, roomRight)),
-        targetHeight: Math.max(heightBefore, Math.min(PREFERRED_HEIGHT, roomBelow))
+        targetWidth,
+        targetHeight,
+        // Pull the corner back only as far as the new size needs, never past the
+        // screen's own top-left.
+        targetX: Math.max(screenLeft, Math.min(window.screenX, screenLeft + screen.availWidth - targetWidth)),
+        targetY: Math.max(screenTop, Math.min(window.screenY, screenTop + screen.availHeight - targetHeight))
     };
 }
 
@@ -124,10 +131,19 @@ function canGrowWindow() {
     return targetWidth > widthBefore + 16 || targetHeight > heightBefore + 16;
 }
 
+/**
+ * Grow the window, moving it first if it would otherwise run off the screen.
+ *
+ * Returns whether the window actually changed size: browsers are inconsistent about
+ * honouring this and refuse silently, so the caller checks rather than assumes.
+ */
 function enlargeWindow() {
-    const { widthBefore, heightBefore, targetWidth, targetHeight } = getGrowthTarget();
+    const { widthBefore, heightBefore, targetWidth, targetHeight, targetX, targetY } = getGrowthTarget();
 
     try {
+        if (targetX !== window.screenX || targetY !== window.screenY) {
+            window.moveTo(targetX, targetY);
+        }
         window.resizeTo(targetWidth, targetHeight);
     } catch {
         return false;
