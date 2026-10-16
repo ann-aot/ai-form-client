@@ -1,0 +1,316 @@
+{
+  "formName": "Freedom of Information(FOI) Request - Selection of Ministry or Agency has records",
+  "formDescription": "This list  includes B.C. Government ministries and agencies that support FOI request submission under BC Freedom of Information and Protection of Privacy Act (FOIPPA).",
+  "formFields": {
+    "ministries": [
+      {
+        "type": "checkbox",
+        "id": "PSE",
+        "key": "PSE",
+        "description": "Post-Secondary Education and Future Skills",
+        "publicBody": "Post-Secondary Education and Future Skills",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "AGR",
+        "key": "AGR",
+        "description": "Agriculture and Food",
+        "publicBody": "Agriculture and Food",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "AG",
+        "key": "AG",
+        "description": "Attorney General",
+        "publicBody": "Attorney General",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "PSA",
+        "key": "PSA",
+        "description": "BC Public Service Agency",
+        "publicBody": "Finance",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "MCF",
+        "key": "MCF",
+        "description": "Children and Family Development",
+        "publicBody": "Children and Family Development",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "CITZ",
+        "key": "CITZ",
+        "description": "Citizens’ Services",
+        "publicBody": "Citizens’ Services",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "ECC",
+        "key": "ECC",
+        "description": "Education and Child Care",
+        "publicBody": "Education and Child Care",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "ECS",
+        "key": "ECS",
+        "description": "Energy and Climate Solutions",
+        "publicBody": "Energy and Climate Solutions",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "ENV",
+        "key": "MOE",
+        "description": "Environment and Parks",
+        "publicBody": "Environment and Parks",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "EAO",
+        "key": "EAO",
+        "description": "Environmental Assessment Office",
+        "publicBody": "Environment and Parks",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "FIN",
+        "key": "FIN",
+        "description": "Finance",
+        "publicBody": "Finance",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "FOR",
+        "key": "FOR",
+        "description": "Forests",
+        "publicBody": "Forests",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "GCP",
+        "key": "GCP",
+        "description": "Government Communications and Public Engagement",
+        "publicBody": "Finance",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "HTH",
+        "key": "HTH",
+        "description": "Health",
+        "publicBody": "Health",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "IRR",
+        "key": "IRR",
+        "description": "Indigenous Relations and Reconciliation",
+        "publicBody": "Indigenous Relations and Reconciliation",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "DAS",
+        "key": "DAS",
+        "description": "Declaration Act Secretariat",
+        "publicBody": "Indigenous Relations and Reconciliation",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "JED",
+        "key": "JED",
+        "description": "Jobs and Economic Growth",
+        "publicBody": "Jobs and Economic Growth",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "LBR",
+        "key": "LBR",
+        "description": "Labour",
+        "publicBody": "Labour",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "WLR",
+        "key": "WLR",
+        "description": "Water, Land and Resource Stewardship",
+        "publicBody": "Water, Land and Resource Stewardship",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "HSG",
+        "key": "HSG",
+        "description": "Housing and Municipal Affairs",
+        "publicBody": "Housing and Municipal Affairs",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "OOP",
+        "key": "OOP",
+        "description": "Office of the Premier",
+        "publicBody": "Office of the Premier",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "PSSG",
+        "key": "PSSG",
+        "description": "Public Safety and Solicitor General",
+        "publicBody": "Public Safety and Solicitor General",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "MSD",
+        "key": "MSD",
+        "description": "Social Development and Poverty Reduction",
+        "publicBody": "Social Development and Poverty Reduction",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "TACS",
+        "key": "TACS",
+        "description": "Tourism, Arts, Culture and Sport",
+        "publicBody": "Tourism, Arts, Culture and Sport",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "TRAN",
+        "key": "TRAN",
+        "description": "Transportation and Transit",
+        "publicBody": "Transportation and Transit",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "EMC",
+        "key": "EMC",
+        "description": "Emergency Management and Climate Readiness",
+        "publicBody": "Emergency Management and Climate Readiness",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "INF",
+        "key": "INF",
+        "description": "Infrastructure",
+        "publicBody": "Infrastructure",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "MCM",
+        "key": "MCM",
+        "description": "Mining and Critical Minerals",
+        "publicBody": "Mining and Critical Minerals",
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+    "formName": "Freedom Of Information(FOI) Request - Landing Page",
+    "formDescription": "Anyone can request BC Government Records as per FOIPPA Act. There are no restrictions on your age or where you live. This service can help you determine if you should request records from government, and when you’re ready, it can help you submit your FOI application.",
+    "properties": {
+        "foiapplicationstart:": {
+            "type": "button",
+            "id": "start",
+            "title": "Start",
+            "description": "Need to click the button or start the FOI Application process."
+        }
+            
+    }
+}
