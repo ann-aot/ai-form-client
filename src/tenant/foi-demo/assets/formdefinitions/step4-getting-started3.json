@@ -1,0 +1,25 @@
+{
+  "formName": "Freedom of Information(FOI) Request - Request Type - General or Personal Type",
+  "formDescription": "Select the FOI Request type you want to submit. General information includes records of a non-personal nature (e.g. briefing notes, contracts, agreements). Personal Type  means recorded information about an identifiable individual (e.g. health care information, correctional records, employment history).",
+  "formFields": {
+    "general": {
+      "type": "radio",
+      "id": "generalfoi",      
+      "description": "General information about government business",      
+      "enum": [
+                "general",
+                ""
+        ]
+    },
+    "personal": {
+      "type": "radio",
+      "id": "personalfoi",      
+      "description": "Personal information about yourself, a dependant child or another person",      
+      "enum": [
+                "personal",
+                ""
+        ]
+    }
+
+  }
+}

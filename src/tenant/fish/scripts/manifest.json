@@ -1,0 +1,7 @@
+{
+  "tenant": "fish",
+  "entry": "src/tenant/fish/index.js",
+  "shared": "src/shared/index.js",
+  "output": "client.js",
+  "builtAt": "2026-07-16T23:07:13.307Z"
+}
