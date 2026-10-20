@@ -1,0 +1,18 @@
+{
+  "formName": "Choose Identity Verification Method",
+  "formDescription": "Personal-information branch step. Asks whether the applicant wants to verify their identity using a BC Services Card (enabling electronic delivery of the response package) or continue without it (response package collected in person).",
+  "sourceComponent": "web/src/app/route-components/choose-identity/choose-identity.component.ts",
+  "formFields": {
+    "verify_with_bcsc": {
+      "type": "radio",
+      "id": "answerYes",
+      "title": "Verify your identity using a BC Services Card?",
+      "description": "Choosing yes redirects to BC Services Card sign-in; requires an email address on the BC Services Card account to receive the FOI response electronically. Choosing no continues the form without login, and records must be collected in person.",
+      "required": true,
+      "options": [
+        { "label": "Login with BC Services Card", "value": "true" },
+        { "label": "Continue without Login", "value": "false" }
+      ]
+    }
+  }
+}

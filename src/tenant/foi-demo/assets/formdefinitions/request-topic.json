@@ -1,0 +1,27 @@
+{
+  "formName": "Request Topic (Yourself)",
+  "formDescription": "Personal-information branch step, shown when the applicant is requesting records about themselves. Lets the applicant select which categories of their own records they want. Some categories (childprotectionparent, childprotectionchild, youthincareparent, youthincarechild, fosterparent, adoption) are mutually exclusive as a group with the other categories, and mutually exclusive with each other in this UI beyond the group itself, and route to dedicated sub-screens.",
+  "sourceComponent": "web/src/app/route-components/request-topic/request-topic.component.ts",
+  "formFields": {
+    "topics": {
+      "type": "selectboxes",
+      "id": "selectedoptions",
+      "title": "Select the corresponding categories of records you are requesting",
+      "description": "The more categories selected, the larger the resulting request. Selecting one of the children-and-family categories (marked hasSubscreen) disables the others outside that group, and vice versa; only one \"single route\" topic (publicServiceEmployment, correctionalFacility, incomeAssistance, anotherTopic) can be combined with a children-and-family topic at a time per the disabling rules in the component.",
+      "required": true,
+      "options": [
+        { "label": "Your employment with the public service", "value": "publicServiceEmployment" },
+        { "label": "Your time spent in a correctional facility", "value": "correctionalFacility" },
+        { "label": "Your income assistance history", "value": "incomeAssistance" },
+        { "label": "Your records as a parent from a child protection investigation", "value": "childprotectionparent", "hasSubscreen": true },
+        { "label": "Your records as a child from a child protection investigation", "value": "childprotectionchild", "hasSubscreen": true },
+        { "label": "Your records as a parent of a child/youth in care or receiving services", "value": "youthincareparent", "hasSubscreen": true },
+        { "label": "Your records as a child/youth in care or receiving services", "value": "youthincarechild", "hasSubscreen": true },
+        { "label": "Your records as a foster parent", "value": "fosterparent", "hasSubscreen": true },
+        { "label": "Your records from an adoption", "value": "adoption", "hasSubscreen": true },
+        { "label": "Other", "value": "anotherTopic" }
+      ]
+    }
+  },
+  "notes": "Options are loaded dynamically from web/src/app/services/data.json (referenceData.topicYourself) rather than being hardcoded in the template; values above reflect that data file's current contents."
+}

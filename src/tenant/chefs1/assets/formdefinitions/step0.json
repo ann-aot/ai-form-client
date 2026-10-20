@@ -73,6 +73,13 @@
             "description": "Select this option if the applicant holds a Certificate of Eligibility for the fee reduction program due to severe and permanent disability.",
             "required": false
         },
+        "coe_number": {
+            "type": "text",
+            "id": "coeNumber",
+            "title": "Certificate of Eligibility Number",
+            "description": "The number of the Certificate of Eligibility for the fee reduction program.",
+            "required": false
+        },
         "fishing_region": {
             "type": "select",
             "id": "location",
@@ -126,32 +133,24 @@
             "description": "Whether the applicant wants to add a Classified Waters Licence for a Class I or Class II water.",
             "required": false
         },
-        "conservation_steelhead_stamp": {
-            "type": "checkbox",
-            "id": "surcharge_steelhead",
-            "title": "Steelhead",
-            "description": "Optional conservation surcharge stamp for Steelhead.",
+        "classified_waters_name": {
+            "type": "text",
+            "id": "classifiedWaterName",
+            "title": "Classified Waters Licence Name",
+            "description": "The name of the Classified Waters Licence the applicant wants to add.",
             "required": false
         },
-        "conservation_non_tidal_salmon_stamp": {
-            "type": "checkbox",
-            "id": "surcharge_salmon",
-            "title": "Non-Tidal Salmon",
-            "description": "Optional conservation surcharge stamp for Non-Tidal Salmon.",
-            "required": false
-        },
-        "conservation_kootenay_shuswap_rainbow_trout_char_stamp": {
-            "type": "checkbox",
-            "id": "surcharge_rainbow-char",
-            "title": "Kootenay/Shuswap Rainbow Trout or Char",
-            "description": "Optional conservation surcharge stamp for Kootenay/Shuswap Rainbow Trout or Char.",
-            "required": false
-        },
-        "conservation_white_sturgeon_conservation_licence": {
-            "type": "checkbox",
-            "id": "surcharge_sturgeon",
-            "title": "White Sturgeon Conservation Licence",
-            "description": "Optional conservation surcharge licence for White Sturgeon.",
+        "conservation_surcharge_stamps": {
+            "type": "selectboxes",
+            "id": "surcharge",
+            "title": "Conservation Surcharge Stamps",
+            "description": "Optional conservation surcharge stamps the applicant wants to add. Multiple may be selected.",
+            "options": [
+                {"label": "Steelhead", "value": "steelhead"},
+                {"label": "Non-Tidal Salmon", "value": "salmon"},
+                {"label": "Kootenay/Shuswap Rainbow Trout or Char", "value": "rainbow-char"},
+                {"label": "White Sturgeon Conservation Licence", "value": "sturgeon"}
+            ],
             "required": false
         },
         "estimated_licence_cost": {

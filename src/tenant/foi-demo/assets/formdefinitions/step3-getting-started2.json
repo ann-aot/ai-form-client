@@ -1,0 +1,19 @@
+{
+    "formName": "Freedom Of Information(FOI) Request - Getting Started Page 2",
+    "formDescription": "If the records you want aren’t publicly available, you can submit a Freedom of Information request.  To help us get the right records to you quickly, you should identify the right ministry or agency to request records from",
+    "properties": {
+        "foiapplicationcontinue:": {
+            "type": "button",
+            "id": "startyourrequest",
+            "title": "Start your request",
+            "description": "Need to click start your request to proceed with the FOI Application process."
+        },
+        "foiapplicationgoback:": {
+            "type": "button",
+            "id": "goBack",
+            "title": "Go Back",
+            "description": "Need to click the go back to return to the previous page."
+        }
+            
+    }
+}

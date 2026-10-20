@@ -1,0 +1,45 @@
+{
+  "formName": "Select Ministry Or Agency",
+  "formDescription": "Collects which BC Government ministry/agency (public body) holds the records being requested. General requests can select multiple ministries (a $10 non-refundable fee applies per ministry selected). Personal requests are limited to a single ministry, and for certain request topics the ministry is locked to a fixed value (e.g. Children and Family Development for adoption/child-protection/foster-parent/youth-in-care topics).",
+  "sourceComponent": "web/src/app/route-components/ministry-confirmation/ministry-confirmation.component.ts",
+  "formFields": {
+    "selected_ministry": {
+      "type": "selectboxes",
+      "id": "selectedMinistry",
+      "title": "What ministry or agency has the records you are looking for?",
+      "description": "General requests: select one or more. Personal requests: select exactly one, unless the ministry is locked by the request topic (in which case this control is disabled and pre-selected).",
+      "required": true,
+      "options": [
+        { "label": "Post-Secondary Education and Future Skills", "value": "PSE" },
+        { "label": "Agriculture and Food", "value": "AGR" },
+        { "label": "Attorney General", "value": "AG" },
+        { "label": "BC Public Service Agency", "value": "PSA" },
+        { "label": "Children and Family Development", "value": "MCF" },
+        { "label": "Citizens’ Services", "value": "CITZ" },
+        { "label": "Education and Child Care", "value": "ECC" },
+        { "label": "Energy and Climate Solutions", "value": "ECS" },
+        { "label": "Environment and Parks", "value": "ENV" },
+        { "label": "Environmental Assessment Office", "value": "EAO" },
+        { "label": "Finance", "value": "FIN" },
+        { "label": "Forests", "value": "FOR" },
+        { "label": "Government Communications and Public Engagement", "value": "GCP" },
+        { "label": "Health", "value": "HTH" },
+        { "label": "Indigenous Relations and Reconciliation", "value": "IRR" },
+        { "label": "Declaration Act Secretariat", "value": "DAS" },
+        { "label": "Jobs and Economic Growth", "value": "JED" },
+        { "label": "Labour", "value": "LBR" },
+        { "label": "Water, Land and Resource Stewardship", "value": "WLR" },
+        { "label": "Housing and Municipal Affairs", "value": "HSG" },
+        { "label": "Office of the Premier", "value": "OOP" },
+        { "label": "Public Safety and Solicitor General", "value": "PSSG" },
+        { "label": "Social Development and Poverty Reduction", "value": "MSD" },
+        { "label": "Tourism, Arts, Culture and Sport", "value": "TACS" },
+        { "label": "Transportation and Transit", "value": "TRAN" },
+        { "label": "Emergency Management and Climate Readiness", "value": "EMC" },
+        { "label": "Infrastructure", "value": "INF" },
+        { "label": "Mining and Critical Minerals", "value": "MCM" }
+      ]
+    }
+  },
+  "notes": "Ministry list is loaded dynamically from web/src/app/services/data.json (referenceData.ministries), not FormGroup-bound (selection is tracked on plain objects, not Angular reactive forms). Selecting EAO, FOR, or ENV surfaces additional contextual warning text but does not add form fields."
+}

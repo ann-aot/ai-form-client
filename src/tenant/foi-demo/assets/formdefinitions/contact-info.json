@@ -1,0 +1,55 @@
+{
+  "formName": "Your Name",
+  "formDescription": "General-information branch step. Collects the applicant's name and, for general requests, an optional certification that the applicant represents an Indigenous Governing Entity (IGE), which is exempt from application fees.",
+  "sourceComponent": "web/src/app/route-components/contact-info/contact-info.component.ts",
+  "formFields": {
+    "first_name": {
+      "type": "text",
+      "id": "firstName",
+      "title": "First name",
+      "description": "Applicant's legal first name.",
+      "required": true,
+      "maxLength": 255
+    },
+    "middle_name": {
+      "type": "text",
+      "id": "middleName",
+      "title": "Middle name",
+      "description": "Applicant's legal middle name, if any.",
+      "required": false,
+      "maxLength": 255
+    },
+    "last_name": {
+      "type": "text",
+      "id": "lastName",
+      "title": "Last name",
+      "description": "Applicant's legal last name.",
+      "required": true,
+      "maxLength": 255
+    },
+    "business_name": {
+      "type": "text",
+      "id": "businessName",
+      "title": "Business/Organization name",
+      "description": "If applicable, the business or organization the applicant represents. Law firms should identify whether they represent the client in this request or someone else, and include a file number where possible.",
+      "required": false,
+      "maxLength": 255
+    },
+    "ige_certification": {
+      "type": "checkbox",
+      "id": "IGE",
+      "title": "I certify that I am a representative of, and authorized to make a request on behalf of, an Indigenous Governing Entity.",
+      "description": "Only shown for general (non-personal) requests. An Indigenous Governing Entity is not required to pay application fees. Checking this exempts the request from the payment step.",
+      "required": false
+    },
+    "ige_name": {
+      "type": "text",
+      "id": "igeName",
+      "title": "Name of Indigenous Governing Entity",
+      "description": "Required only when the IGE certification checkbox above is checked.",
+      "required": false,
+      "conditionallyRequiredWhen": "ige_certification is checked",
+      "maxLength": 255
+    }
+  }
+}

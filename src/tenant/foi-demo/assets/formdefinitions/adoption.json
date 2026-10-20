@@ -1,0 +1,58 @@
+{
+  "formName": "Adoption Records",
+  "formDescription": "Sub-screen for the 'adoption' request topic. Lets the applicant select which category of adoption-related record categories apply (based on their relationship to the adoption) and, within each selected category, which specific record types they want. Selecting 'Are you the adopted child?' additionally offers an optional attachment of birth documentation, needed to determine whether identifying information about birth parent(s) can be released.",
+  "sourceComponent": "web/src/app/route-components/adoption/adoption.component.ts",
+  "formFields": {
+    "adoption_selection": {
+      "type": "selectboxes",
+      "id": "adoptionselection",
+      "title": "Select the corresponding types of records you would like to receive in your request",
+      "description": "The more selected, the larger the resulting request. Each main option, once checked, reveals its own set of record-type sub-options.",
+      "required": true,
+      "hierarchical": true,
+      "options": [
+        {
+          "label": "Are you the biological parent?",
+          "value": "Biological Parent",
+          "suboptions": [
+            "Adoptive Parent(s)’ Background", "Child & Birth Family Background",
+            "Post Placement Documentation & Correspondence", "Financial", "Case Notes",
+            "Legal and Other Documents", "Information and Correspondence"
+          ]
+        },
+        {
+          "label": "Are you the adoptive parent?",
+          "value": "Adoptive Parent",
+          "suboptions": [
+            "Adoptive Parent(s)’ Background", "Child & Birth Family Background",
+            "Post Placement Documentation & Correspondence", "Financial", "Case Notes",
+            "Legal and Other Documents", "Information and Correspondence"
+          ]
+        },
+        {
+          "label": "Are you the adopted child?",
+          "value": "Adoptive Child",
+          "suboptions": [
+            "Adoptive Parent(s)’ Background", "Child & Birth Family Background",
+            "Post Placement Documentation & Correspondence", "Financial", "Case Notes",
+            "Legal and Other Documents", "Information and Correspondence"
+          ],
+          "revealsField": "birth_documentation"
+        },
+        {
+          "label": "Other",
+          "value": "Other",
+          "suboptions": []
+        }
+      ]
+    },
+    "birth_documentation": {
+      "type": "file",
+      "id": "birthDocumentation",
+      "title": "Optional: Attach copy of birth documentation",
+      "description": "Only shown when 'Are you the adopted child?' is selected. Accepted proof includes a Birth Registration, Birth Extract, or Registration of Live Birth from BC Vital Statistics. Without one of these documents, only non-identifying information about birth parent(s) can be provided.",
+      "required": false
+    }
+  },
+  "notes": "Main/sub options are loaded dynamically from web/src/app/services/data.json (referenceData.adoption)."
+}

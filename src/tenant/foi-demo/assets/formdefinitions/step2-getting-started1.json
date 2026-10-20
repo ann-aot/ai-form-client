@@ -1,0 +1,19 @@
+{
+    "formName": "Freedom Of Information(FOI) Request - Getting Started Page 1",
+    "formDescription": "Before you apply, Some records are publicly available or accessible - Searching on gov.bc.ca, BC Open Information Catalogue or contacting ministry directly",
+    "properties": {
+        "foiapplicationcontinue:": {
+            "type": "button",
+            "id": "continue",
+            "title": "Continue",
+            "description": "Need to click the continue to proceed with the FOI Application process."
+        },
+        "foiapplicationgoback:": {
+            "type": "button",
+            "id": "goBack",
+            "title": "Go Back",
+            "description": "Need to click the go back to return to the previous page."
+        }
+            
+    }
+}

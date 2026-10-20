@@ -1,0 +1,13 @@
+[
+  {
+    "stepIdentifier": "step0",
+    "shortDescription": "Asks questions about the fishing licence application, including the applicant's name, contact information, and the type of licence being applied for.",
+    "intentTags": [
+      "licence-details",
+      "region",
+      "age",
+      "duration",
+      "licence-cost"
+    ]
+  }
+]

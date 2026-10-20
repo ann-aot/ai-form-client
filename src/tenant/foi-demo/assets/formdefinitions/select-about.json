@@ -1,0 +1,29 @@
+{
+  "formName": "Who Is This Request About",
+  "formDescription": "Personal-information branch step. Lets the applicant select who the requested records are about: themselves, a child under 12, and/or another person. At least one option must be selected; the combination selected determines the routing to subsequent steps (e.g. child-information, another-information, adoption).",
+  "sourceComponent": "web/src/app/route-components/select-about/select-about.component.ts",
+  "formFields": {
+    "about_yourself": {
+      "type": "checkbox",
+      "id": "yourself",
+      "title": "Yourself",
+      "description": "Select if you are requesting records about yourself.",
+      "required": false
+    },
+    "about_child": {
+      "type": "checkbox",
+      "id": "child",
+      "title": "A child under 12 years old",
+      "description": "Select if you are requesting records about a child under 12 years old, including your own child.",
+      "required": false
+    },
+    "about_another": {
+      "type": "checkbox",
+      "id": "another",
+      "title": "Another person",
+      "description": "Select if you are requesting records on behalf of another person.",
+      "required": false
+    }
+  },
+  "notes": "No individual checkbox is marked required by the Angular validators, but at least one of the three must be checked to enable Continue (enforced in component logic, not the FormGroup)."
+}

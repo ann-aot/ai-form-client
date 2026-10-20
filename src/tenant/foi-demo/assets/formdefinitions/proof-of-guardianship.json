@@ -1,0 +1,19 @@
+{
+  "formName": "Proof Of Guardianship Or Permission",
+  "formDescription": "Shared component rendered for two different route contexts: verifying guardianship of a child, or verifying permission to act on behalf of another person. The field asked and the field written to the request differ by context (proofOfGuardianship vs proofOfPermission) but the form shape is identical.",
+  "sourceComponent": "web/src/app/route-components/proof-of-guardianship/proof-of-guardianship.component.ts",
+  "formFields": {
+    "answer_yes": {
+      "type": "radio",
+      "id": "answerYes",
+      "title": "Do you have proof of guardianship of the child? / Do you have permission to access records on behalf of this person?",
+      "description": "For the child context: proof of guardianship may include a court order, declaration form, or similar legal document. For the person context: each ministry has a unique authorization/consent form that must be completed and signed by the person. Answering \"No\" surfaces a warning with links to the relevant forms/resources; it does not block continuing.",
+      "required": true,
+      "options": [
+        { "label": "Yes", "value": "true" },
+        { "label": "No", "value": "false" }
+      ]
+    }
+  },
+  "notes": "targetKey (and therefore the field actually persisted on the request) is 'proofOfGuardianship' when proofFor='child', or 'proofOfPermission' when proofFor='person'; this is set via route data, not hardcoded per-route in this component."
+}

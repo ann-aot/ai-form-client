@@ -1,0 +1,9 @@
+[
+  {
+    "stepIdentifier": "step0",
+    "shortDescription": "Asks questions about the user's FOI request",
+    "intentTags": [
+      "foi-request"
+    ]
+  }
+]

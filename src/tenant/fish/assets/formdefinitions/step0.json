@@ -2,12 +2,23 @@
     "formName": "BC Fishing Licence Application",
     "formDescription": "BC Fishing Licence Application form. Information about the angler, licence type, fishing region, optional classifications, conservation surcharge stamps, and estimated licence cost will be collected in this form.",
     "formFields": {
-        "angler_date_of_birth": {
-            "type": "date",
-            "id": "dob",
-            "title": "Date of Birth",
-            "description": "Angler's date of birth. Used to determine age eligibility and applicable licence rate.",
-            "required": true
+        "angler_age_range": {
+            "type": "select",
+            "id": "angler_age_range",
+            "title": "Angler's Age Range",
+            "description": "Whether the applicatnt is an adult or under 16 years of age.",
+            "required": true,
+            "placeholder": "Please select",
+            "options": [
+                {
+                    "label": "Under 16",
+                    "value": "child"
+                },
+                {
+                    "label": "16 and over",
+                    "value": "adult"
+                }
+            ]
         },
         "bc_resident_status": {
             "type": "radio",

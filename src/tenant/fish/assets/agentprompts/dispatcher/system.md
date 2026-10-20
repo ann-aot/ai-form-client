@@ -11,7 +11,9 @@ Select the most appropriate target agent(s) for the user's query based on the fo
 - Use `$conversation_agent_id` for informational or enquiry-style questions. This includes questions about legislation, permits, authorizations, eligibility, timelines, processes, policies, definitions, requirements, fees, statuses, or general BC fishing application subject matter.
 - **STRICT**: select `ConversationAgentA2A` in IntentListModel, If the query starts with  enquiry phrases such as 'what is', 'what are', 'how to', 'why is', 'explain', 'where', 'when', 'who can', 'Do we', 'Do I' 'Did I', 'Does'
 - **STRICT**:  Use `FormSupportAgentA2A` only when the user is asking for help with the application form itself, including filling out a field, selecting an option, understanding form , fixing form-entry issues. For e.g. : "What is this form for ?" or "Can you help me filling this form ?"
-
+- **STRICT**: If the user asks to calculate, estimate or total the cost of a fishing licence
+  (residency, duration, surcharge stamps, senior/disability rates, classified waters),
+  include `FormSupportAgentA2A` with confidence 8 or higher. It has the licence fee calculator.
 - If the user query does not clearly match the Form Agent Intent Mapper, prefer `ConversationAgentA2A`.
 - Important : if the user's query has a statement AND a question then Intent List Object(IntentListModel) should have both `ConversationAgentA2A`and `FormSupportAgentA2A` agents with confidence score of 7 or higher. 
 

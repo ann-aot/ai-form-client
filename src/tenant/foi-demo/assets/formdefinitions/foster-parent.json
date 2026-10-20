@@ -1,0 +1,37 @@
+{
+  "formName": "Foster Parent Records",
+  "formDescription": "Sub-screen for the 'fosterparent' request topic. Lets the applicant select which record files apply to them as a foster parent and, within each selected file, which specific record types they want.",
+  "sourceComponent": "web/src/app/route-components/foster-parent/foster-parent.component.ts",
+  "formFields": {
+    "foster_parent_selection": {
+      "type": "selectboxes",
+      "id": "fosterparentselection",
+      "title": "Select the corresponding types of records you would like to receive in your request",
+      "description": "The more selected, the larger the resulting request. Each main option, once checked, reveals its own set of record-type sub-options.",
+      "required": true,
+      "hierarchical": true,
+      "options": [
+        {
+          "label": "Resource (Foster Parent) File",
+          "value": "Resource (Foster Parent) File ",
+          "suboptions": [
+            "Recording", "Applications, Assessments, Approvals and Licensing Documentation", "Financial",
+            "Investigations, Incidents and Reports", "Accountability, Training and Recruitment",
+            "Relief Caregiver Documentation", "Child Information", "General Correspondence ", "Case Notes"
+          ]
+        },
+        {
+          "label": "Financial Contract File",
+          "value": "Financial Contract File ",
+          "suboptions": ["Legal (Signed Documents)", "Contract Selection and Approval", "Accountability", "Financial"]
+        },
+        {
+          "label": "Other",
+          "value": "Other",
+          "suboptions": []
+        }
+      ]
+    }
+  },
+  "notes": "Main/sub options are loaded dynamically from web/src/app/services/data.json (referenceData.fosterparent)."
+}

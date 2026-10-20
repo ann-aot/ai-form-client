@@ -1,0 +1,45 @@
+{
+  "formName": "Describe The Records And Timeframe",
+  "formDescription": "Collects a free-text description of the records being requested and the date range to search. For personal requests against specific ministries, also conditionally collects a BC Public Service employee number or BC Correctional Service number to help locate records.",
+  "sourceComponent": "web/src/app/route-components/description-timeframe/description-timeframe.component.ts",
+  "formFields": {
+    "description": {
+      "type": "textarea",
+      "id": "description",
+      "title": "Describe the records you are looking for",
+      "description": "Be as specific as possible: include key words, file types, file numbers, previous FOI request numbers, categories of records to exclude, and (where helpful) the purpose the records were created for. Avoid special characters like quotation marks or bullet points.",
+      "required": true,
+      "maxLength": 1200
+    },
+    "from_date": {
+      "type": "date",
+      "id": "fromDate",
+      "title": "From Date",
+      "description": "Start of the date range to search. Must not be in the future.",
+      "required": true
+    },
+    "to_date": {
+      "type": "date",
+      "id": "toDate",
+      "title": "To Date",
+      "description": "End of the date range to search. Must not be in the future and must be on/after the From Date.",
+      "required": true
+    },
+    "public_service_employee_number": {
+      "type": "text",
+      "id": "publicServiceEmployeeNumber",
+      "title": "BC Public Service Employee Number (if known)",
+      "description": "Only shown when the selected ministry is the BC Public Service Agency (PSA) and the request is personal.",
+      "required": false,
+      "maxLength": 255
+    },
+    "correctional_service_number": {
+      "type": "text",
+      "id": "correctionalServiceNumber",
+      "title": "BC Correctional Service Number (if known)",
+      "description": "Only shown when the selected ministry is Public Safety and Solicitor General (PSSG) and the request is personal.",
+      "required": false,
+      "maxLength": 255
+    }
+  }
+}

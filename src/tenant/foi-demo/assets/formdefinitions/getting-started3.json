@@ -1,0 +1,24 @@
+{
+  "formName": "FOI Request Type",
+  "formDescription": "First step of the FOI request wizard. Determines whether the applicant is requesting general (non-personal) government information or personal information about themselves, a dependant child, or another person. The answer drives which subsequent steps are shown.",
+  "sourceComponent": "web/src/app/route-components/getting-started3/getting-started3.component.ts",
+  "formFields": {
+    "request_type": {
+      "type": "radio",
+      "id": "requestType",
+      "title": "What type of information are you looking for?",
+      "description": "General information includes records of a non-personal nature (e.g. briefing notes, contracts, agreements). Personal information means recorded information about an identifiable individual (e.g. health care information, correctional records, employment history).",
+      "required": true,
+      "options": [
+        {
+          "label": "General information about government business",
+          "value": "general"
+        },
+        {
+          "label": "Personal information about yourself, a dependant child or another person",
+          "value": "personal"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "formName": "Adoptive Parents",
+  "formDescription": "Optional step for adoption-related personal requests. Collects the names of the applicant's adoptive mother/parent and adoptive father/parent to help locate records faster. Skipped entirely for personal requests that are not adoption-related.",
+  "sourceComponent": "web/src/app/route-components/adoptive-parents/adoptive-parents.component.ts",
+  "formFields": {
+    "mother_first_name": {
+      "type": "text",
+      "id": "motherFirstName",
+      "title": "Adoptive Mother/Parent - First name",
+      "description": "First name of the applicant's adoptive mother or parent.",
+      "required": false,
+      "maxLength": 255
+    },
+    "mother_last_name": {
+      "type": "text",
+      "id": "motherLastName",
+      "title": "Adoptive Mother/Parent - Last name",
+      "description": "Last name of the applicant's adoptive mother or parent.",
+      "required": false,
+      "maxLength": 255
+    },
+    "father_first_name": {
+      "type": "text",
+      "id": "fatherFirstName",
+      "title": "Adoptive Father/Parent - First name",
+      "description": "First name of the applicant's adoptive father or parent.",
+      "required": false,
+      "maxLength": 255
+    },
+    "father_last_name": {
+      "type": "text",
+      "id": "fatherLastName",
+      "title": "Adoptive Father/Parent - Last name",
+      "description": "Last name of the applicant's adoptive father or parent.",
+      "required": false,
+      "maxLength": 255
+    }
+  }
+}
