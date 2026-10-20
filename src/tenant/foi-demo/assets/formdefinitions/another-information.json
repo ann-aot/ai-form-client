@@ -1,0 +1,53 @@
+{
+  "formName": "Another Person's Information",
+  "formDescription": "Shown when requesting records on behalf of another person. Collects that person's identifying information and requires an attached signed consent or proof of authority.",
+  "sourceComponent": "web/src/app/route-components/another-information/another-information.component.ts",
+  "formFields": {
+    "first_name": {
+      "type": "text",
+      "id": "firstName",
+      "title": "First name",
+      "description": "The other person's legal first name.",
+      "required": true,
+      "maxLength": 255
+    },
+    "middle_name": {
+      "type": "text",
+      "id": "middleName",
+      "title": "Middle name",
+      "description": "The other person's legal middle name, if any.",
+      "required": false,
+      "maxLength": 255
+    },
+    "last_name": {
+      "type": "text",
+      "id": "lastName",
+      "title": "Last name",
+      "description": "The other person's legal last name.",
+      "required": true,
+      "maxLength": 255
+    },
+    "also_known_as": {
+      "type": "text",
+      "id": "alsoKnownAs",
+      "title": "Also known as",
+      "description": "Any other name(s) the person is or was known by.",
+      "required": false,
+      "maxLength": 255
+    },
+    "date_of_birth": {
+      "type": "date",
+      "id": "dateOfBirth",
+      "title": "What is the person's date of birth?",
+      "description": "The other person's date of birth. Must not be a future date.",
+      "required": false
+    },
+    "proof_of_authorization": {
+      "type": "file",
+      "id": "proofOfAuthorization",
+      "title": "Attach signed consent or proof of authority",
+      "description": "A single-file attachment proving the applicant's authority to request records on this person's behalf, or that person's signed, informed consent.",
+      "required": true
+    }
+  }
+}

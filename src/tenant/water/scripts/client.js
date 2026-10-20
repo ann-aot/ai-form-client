@@ -18,9 +18,17 @@ import { buildDeleteChatDialogHtml, createDeleteChatDialog } from './header-menu
 import { buildExpandToggleHtml, createExpandToggle } from './header-menu/ui/expandToggle.js';
 import { LAUNCHER_STYLES } from './launcher/styles/launcherStyles.js';
 import { buildLauncherHtml, createLauncher } from './launcher/ui/launcher.js';
+import { DRAG_STYLES } from './drag/styles/dragStyles.js';
+import { createDraggable } from './drag/ui/draggable.js';
 import { FORM_OVERLAY_STYLES } from './form-overlay/styles/formOverlayStyles.js';
 import { showFormOverlay, hideFormOverlay } from './form-overlay/ui/formOverlay.js';
 import { PRODUCT_NAME } from './shared/productName.js';
+import { isPopupWindow, saveChatOpenState, wasChatOpenHere, wasParentChatOpen } from './shared/windowContext.js';
+import { POPUP_CALLOUT_STYLES } from './popup-callout/styles/popupCalloutStyles.js';
+import { buildPopupCalloutHtml, createPopupCallout, POPUP_LAUNCHER_NOTICE } from './popup-callout/ui/popupCallout.js';
+import { announceToOpener, watchForOpenPopups } from './shared/popupPresence.js';
+import { POPUP_BLOCK_STYLES } from './popup-block/styles/popupBlockStyles.js';
+import { buildPopupBlockHtml, createPopupBlock } from './popup-block/ui/popupBlock.js';
 
 /**
  * Allow testing of alternative javascript
@@ -76,8 +84,6 @@ else {
 
     (function () {
 
-// Feature flag: set to true to re-enable the guided questions UI when ready.
-const GUIDED_QUESTIONS_ENABLED = false;
 const clientId = '11111111-1111-4111-8111-111111111111';
 // TEST: const API_BACKEND_BASE_URL = 'https://nraif-671b-test-api.ambitiousmeadow-949bd8c6.canadacentral.azurecontainerapps.io';
 // DEV : const API_BACKEND_BASE_URL = 'https://nraif-671b-dev-api.icymushroom-bc5ec66d.canadacentral.azurecontainerapps.io';
@@ -88,7 +94,6 @@ const clientId = '11111111-1111-4111-8111-111111111111';
 const API_BACKEND_BASE_URL = 'https://nraif-671b-test-api.redground-c9aa9e63.canadacentral.azurecontainerapps.io'
 
 const CONVERSATION_HISTORY_API_URL = new URL(`/tenants/${clientId}/history`, API_BACKEND_BASE_URL).toString();
-// const GUIDED_QUESTIONS_API_URL = new URL(`/tenants/${clientId}/guided-questions`, API_BACKEND_BASE_URL).toString();
 // Derive ws/wss from the API backend URL so local http uses ws and deployed
 // https uses wss without maintaining a second host setting.
 const WEBSOCKET_BASE_URL = (() => {
@@ -99,9 +104,19 @@ const WEBSOCKET_BASE_URL = (() => {
 
 let socket = null;
 let socketOpenPromise = null;
+// Reject handle for socketOpenPromise. Tearing a socket down has to settle its
+// pending open promise as well - a sendMessage() awaiting it would otherwise hang
+// forever, because the teardown drops the handlers that would have settled it.
+let socketOpenReject = null;
+// Bumped whenever the conversation is discarded (delete chat). A send that was
+// already under way compares the generation it started in against this one, so a
+// late reply or failure from the abandoned request cannot touch the fresh chat.
+let chatGeneration = 0;
 // Keep the chat UI request/response model aligned with the backend's serialized
 // shared websocket request handling.
 let requestInFlight = false;
+const FORM_UPDATE_COMPLETE_EVENT = 'wp-form-update-complete';
+let formUpdateInProgress = false;
 
 let livestockPurposehtml = `<tr class="possegrid">
                                 <td class="possegrid" valign="middle" colspan="1" rowspan="1" style="text-align: left" nowrap=""><span id="PurposeEdit_100536361_100379172_173010900_sp" name="PurposeEdit_100536361_100379172_173010900_sp" class="possegrid" style="text-align: left"><a data-id="PurposeEdit_Livestock and Animal_200_m3/year_173010900" id="PurposeEdit_100536361_100379172_173010900" name="PurposeEdit_100536361_100379172_173010900" class="possegrid" tabindex="14" title="Edit" target="_self" href="javascript:PossePopup('PurposeEdit_100536361_100379172_173010900',
@@ -257,12 +272,23 @@ function createFallbackThreadId() {
     return `session-${randomHex}`;
 }
 
-function getStoredThreadId() {
+/**
+ * The shared thread id as stored, or null.
+ *
+ * Separate from getStoredThreadId() because minting an id is the wrong answer for a
+ * window asking "which conversation is current?" - it would answer a cleared store
+ * by inventing a thread nobody else is on.
+ */
+function readStoredThreadId() {
     try {
-        return localStorage.getItem(THREAD_ID_STORAGE_KEY) || createFallbackThreadId();
+        return localStorage.getItem(THREAD_ID_STORAGE_KEY);
     } catch {
-        return createFallbackThreadId();
+        return null;
     }
+}
+
+function getStoredThreadId() {
+    return readStoredThreadId() || createFallbackThreadId();
 }
 
 function saveThreadId(threadId) {
@@ -385,18 +411,45 @@ function migrateChatScrollPosition(oldThreadId, newThreadId) {
     }
 }
 
+/**
+ * A thread id with the orchestrator's tenant namespace taken off.
+ *
+ * The orchestrator reports a thread as "<clientId>:<sessionId>". That composite is
+ * its own lookup key, not a session id this client can use: adopted as a window's
+ * thread id it silently moves the conversation to a storage key the other window is
+ * not watching, and sends the tenant twice in the history URL, which is built as
+ * /tenants/<clientId>/history/<threadId>.
+ *
+ * Fallback rather than the rule - see extractThreadIdFromResponse - because the
+ * prefix is the backend's format and not ours to depend on.
+ */
+function stripThreadNamespace(threadId) {
+    if (typeof threadId !== 'string' || !threadId) return null;
+    const prefix = `${clientId}:`;
+    return threadId.startsWith(prefix) ? threadId.slice(prefix.length) : threadId;
+}
+
+/**
+ * The session this response belongs to.
+ *
+ * A reply says so twice: `session_id` at the top level, and a namespaced `thread_id`
+ * inside the body. The top-level field wins because it is the one the backend labels
+ * as the session, it is what the session_init path already adopts, and it needs no
+ * assumptions about how a thread id is composed.
+ */
 function extractThreadIdFromResponse(response) {
     if (!response) return null;
-    if (typeof response.thread_id === 'string') return response.thread_id;
+    if (typeof response.session_id === 'string' && response.session_id) return response.session_id;
+    if (typeof response.thread_id === 'string') return stripThreadNamespace(response.thread_id);
 
     const body = response.response;
     if (!body) return null;
 
     if (Array.isArray(body)) {
         const threadObj = body.find((item) => item && typeof item.thread_id === 'string');
-        return threadObj ? threadObj.thread_id : null;
+        return threadObj ? stripThreadNamespace(threadObj.thread_id) : null;
     }
-    if (typeof body.thread_id === 'string') return body.thread_id;
+    if (typeof body.thread_id === 'string') return stripThreadNamespace(body.thread_id);
     return null;
 }
 
@@ -838,8 +891,13 @@ function loadPendingSuggestions() {
  * covered, which is the failure that would matter most.
  */
 function finishPendingSuggestions() {
+    const completedFormUpdate = formUpdateInProgress;
+    formUpdateInProgress = false;
     clearPendingSuggestions();
     hideFormOverlay();
+    if (completedFormUpdate) {
+        document.dispatchEvent(new CustomEvent(FORM_UPDATE_COMPLETE_EVENT));
+    }
 }
 
 function clearPendingSuggestions() {
@@ -944,6 +1002,7 @@ function applyFormSupportSuggestionsFromResponse(response) {
     // Clear any leftover suggestions from a previous response before saving the new batch
     clearPendingSuggestions();
     savePendingSuggestions(suggestions);
+    formUpdateInProgress = true;
     applyNextPendingSuggestion();
 }
 
@@ -1058,6 +1117,7 @@ function applyNextPendingSuggestion() {
 function resumePendingSuggestions() {
     const pending = loadPendingSuggestions();
     if (pending.length === 0) return;
+    formUpdateInProgress = true;
     // Cover the form straight away rather than after the settle below: the work is
     // already in progress from the user's point of view, and the gap is where a
     // stray click would land on a field about to be written to.
@@ -1078,6 +1138,12 @@ function injectStyles() {
         ${LAUNCHER_STYLES}
 
         ${FORM_OVERLAY_STYLES}
+
+        ${POPUP_CALLOUT_STYLES}
+
+        ${POPUP_BLOCK_STYLES}
+
+        ${DRAG_STYLES}
 
         .wp-chat-modal {
             display: none;
@@ -1420,11 +1486,13 @@ function initBot() {
     ];
 
     const container = document.createElement('div');
+    container.setAttribute('lang', 'en-CA');
     container.innerHTML = `
 ${buildLauncherHtml()}
         <div class="wp-chat-modal" id="wp-chat-modal">
-            <div class="wp-chat-header">
+            <div class="wp-chat-header" title="Drag to move">
                 <div class="wp-chat-title">
+                    <svg class="wp-chat-drag-grip" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 4a2 2 0 110 4 2 2 0 010-4zm6 0a2 2 0 110 4 2 2 0 010-4zM9 10a2 2 0 110 4 2 2 0 010-4zm6 0a2 2 0 110 4 2 2 0 010-4zM9 16a2 2 0 110 4 2 2 0 010-4zm6 0a2 2 0 110 4 2 2 0 010-4z"/></svg>
                     <span>${PRODUCT_NAME}</span>
                 </div>
                 <div class="wp-chat-header-actions">${buildExpandToggleHtml()}${buildHeaderMenuHtml(menuItems)}
@@ -1433,6 +1501,7 @@ ${buildLauncherHtml()}
                     </button>
                 </div>
             </div>
+${buildPopupCalloutHtml()}
 
             <div class="wp-chat-messages" id="wp-chat-messages">${buildWelcomePanelHtml()}
 
@@ -1446,7 +1515,7 @@ ${buildLauncherHtml()}
             </div>
 
             <div class="wp-chat-input-container">
-                <textarea class="wp-chat-input" id="wp-chat-input" placeholder="Type your message..." rows="1"></textarea>
+                <textarea class="wp-chat-input" id="wp-chat-input" placeholder="Type your message..." rows="1" lang="en-CA" spellcheck="true"></textarea>
                 <button class="wp-chat-send" id="wp-chat-send-btn" type="button" aria-label="Send message" title="Send message">
                 <svg class="wp-chat-send-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true" focusable="false">
                     <path d="M3.4 20.4l17.45-7.48a1 1 0 000-1.84L3.4 3.6a.996.996 0 00-1.39.91L2 9.12c0 .5.37.93.87.99L17 12 2.87 13.88c-.5.07-.87.5-.87 1l.01 4.61c0 .71.73 1.2 1.39.91z"></path>
@@ -1454,6 +1523,7 @@ ${buildLauncherHtml()}
                 </button>
             </div>
 ${buildDeleteChatDialogHtml()}
+${buildPopupBlockHtml()}
         </div>
     `;
     document.body.appendChild(container);
@@ -1472,6 +1542,40 @@ ${buildDeleteChatDialogHtml()}
     const chatMessages = document.getElementById('wp-chat-messages');
     const typingIndicator = document.getElementById('wp-chat-typing');
     const guidedQuestionsContainer = document.getElementById('wp-chat-guided-questions');
+
+    /**
+     * What the chat was doing when this window last had a say.
+     *
+     * Two questions off one record. A postback rebuilds the widget from scratch, so a
+     * window has to be told what it was showing a moment ago; and a popup inherits its
+     * opener's copy of that record as it is created, which is what tells it the form
+     * window was mid-conversation.
+     *
+     * Both are read before anything opens or closes the chat, since doing either
+     * rewrites the record.
+     */
+    const isPopup = isPopupWindow();
+
+    /**
+     * Which window's preferences these are - its size, and where it sits.
+     *
+     * A popup inherits its opener's sessionStorage as it is created, so anything the
+     * user chose in the form window arrives in the sub-form window as if they had
+     * chosen it there. That is right for the conversation, which is the same
+     * conversation, and wrong for everything about the window: a panel moved to the
+     * middle of a maximised form window reappears in the middle of a 700px sub-form
+     * window, and a size chosen to fill a large screen fills a small one entirely.
+     * The two windows are different shapes with different things worth avoiding, so a
+     * choice made in one is not an instruction for the other.
+     *
+     * Scoping the keys rather than clearing them on arrival is what lets a popup keep
+     * its own choices across its own postbacks: the form window never writes the
+     * popup's keys, so a popup starts from the defaults and holds what it is then
+     * given.
+     */
+    const windowScope = isPopup ? 'popup' : 'form';
+    const parentChatWasOpen = isPopup && wasParentChatOpen();
+    const chatWasOpenHere = wasChatOpenHere();
 
     let sessionId = getStoredThreadId();
     let restoredScrollTop = loadChatScrollPosition(sessionId);
@@ -1498,12 +1602,120 @@ ${buildDeleteChatDialogHtml()}
         }
     });
 
-    // The window keeps whatever size the user chose for as long as the page lives,
-    // including across close/reopen, so nothing here needs the returned handle.
-    createExpandToggle({ root: chatModal, modal: chatModal });
+    // The window keeps whatever size the user chose - across close and reopen, and
+    // across the postbacks that rebuild this widget as they work through a step - so
+    // nothing here needs the returned handle. The scope keeps a sub-form window from
+    // opening at a size chosen for the form window behind it.
+    createExpandToggle({
+        root: chatModal,
+        modal: chatModal,
+        scope: windowScope
+    });
 
-    // Shows the first-visit helper message and retires it on the first interaction.
-    createLauncher({ root: chatLauncher });
+    // Shows the helper message, which stays until the user answers it. The step is
+    // passed in because it is what tells a postback from a page turn: the form posts
+    // back on nearly every interaction and rebuilds this widget each time.
+    //
+    // In a popup opened from a closed chat there is something more useful to say, so
+    // the launcher carries that instead: the conversation is still here, and nothing
+    // about a fresh browser window suggests it.
+    const launcher = createLauncher({
+        root: chatLauncher,
+        pageKey: getCurrentFormStepFromDom() || '',
+        notice: isPopup && !parentChatWasOpen ? POPUP_LAUNCHER_NOTICE : null
+    });
+
+    // Explains, in a popup, that the conversation carries over - and offers to make
+    // the window bigger. Shown only by the branches below; building it is not
+    // showing it.
+    const popupCallout = createPopupCallout({ root: chatModal });
+
+    // Puts the assistant out of use while a sub-form popup is open, both ways in:
+    // the chat itself, and the launcher that would otherwise reopen it.
+    const popupBlock = createPopupBlock({
+        modal: chatModal,
+        launcher: chatLauncher,
+        button: chatButton,
+        setLauncherMessage: (text) => launcher.setMessage(text)
+    });
+
+    // How close to the top the launcher may sit before its message has to hang below
+    // it instead of above. Roughly the tallest the bubble gets at its fixed width.
+    const TOOLTIP_FLIP_ABOVE_PX = 180;
+
+    // The same on the horizontal: the bubble's 251px, plus the 8px the drag keeps
+    // between any box and the window edge. Measured from the button's right edge,
+    // which is where the bubble hangs from.
+    const TOOLTIP_FLIP_LEFT_PX = 259;
+
+    /**
+     * Let the user move the assistant off whatever it is covering.
+     *
+     * The corner is the right place until a sub-form opens: those windows are around
+     * 700px wide, and the panel then sits on top of most of the form it is there to
+     * help with. The position is remembered, so a postback does not shuffle the
+     * assistant back to the corner mid-step.
+     *
+     * Both boxes take the same slot, so they read as one thing that has been put
+     * somewhere rather than two that happen to move. The panel opens from the corner
+     * its button was left at, and the button comes back to the corner the panel was
+     * closed from. Only one of them is ever on screen, so sharing a position can
+     * never put them on top of each other.
+     *
+     * Where the panel will not fit at that corner it is clamped for the showing and
+     * the stored corner is left as the user set it - so the launcher still returns to
+     * its own spot rather than inheriting a compromise made for a much larger box.
+     */
+    const launcherDrag = createDraggable({
+        element: chatLauncher,
+        id: windowScope,
+        isHandle: (event) => {
+            // Paused for a sub-form popup. The whole wrapper takes the pointer then
+            // so the message explaining the pause can be hovered, but a launcher
+            // that cannot be opened is not worth moving either.
+            if (chatLauncher.classList.contains('wp-chat-launcher-blocked')) return false;
+
+            const target = event.target;
+            if (!(target instanceof Element)) return true;
+            // Only the button and the dismiss X take the pointer here; the message
+            // and the space around it are pointer-events: none, so a press over them
+            // never reaches this element. The X is aimed at the message rather than
+            // at the launcher.
+            return !target.closest('.wp-chat-launcher-tooltip-dismiss');
+        },
+        onMove: (rect) => {
+            // The rect is the button's: the message is positioned out of flow, so it
+            // adds nothing to the wrapper. Both tests therefore ask about the room
+            // around the button, which is what the message has to fit into.
+            chatLauncher.classList.toggle(
+                'wp-chat-launcher-flipped',
+                rect.top < TOOLTIP_FLIP_ABOVE_PX
+            );
+            chatLauncher.classList.toggle(
+                'wp-chat-launcher-near-left',
+                rect.right < TOOLTIP_FLIP_LEFT_PX
+            );
+        }
+    });
+
+    const modalDrag = createDraggable({
+        element: chatModal,
+        id: windowScope,
+        isHandle: (event) => {
+            // Paused: every child is inert and pointer-events: none, so the press
+            // lands on the modal itself and the whole panel becomes the handle.
+            // Moving it aside to read the form underneath is the one thing left
+            // worth doing with it.
+            if (chatModal.classList.contains('wp-chat-modal-blocked')) return true;
+
+            const target = event.target;
+            if (!(target instanceof Element)) return false;
+            // The header carries the expand, menu and close controls. A press on one
+            // of those is aimed at the control, not at the window around it.
+            if (target.closest('button, a, input, textarea, select')) return false;
+            return Boolean(target.closest('.wp-chat-header'));
+        }
+    });
 
     const deleteChatDialog = createDeleteChatDialog({
         root: chatModal,
@@ -1539,11 +1751,24 @@ ${buildDeleteChatDialogHtml()}
      * emptied chat should look like a freshly opened one.
      */
     function deleteChat() {
+        // A reply still in flight belongs to the thread being discarded, and
+        // initWebSocket() below drops the old socket's onmessage/onclose handlers -
+        // the only two paths that clear the loading state. Retire the request here or
+        // the typing dots animate forever, the input stays disabled, and every later
+        // send is refused by the "already in progress" guard until a page reload.
+        chatGeneration += 1;
+        requestInFlight = false;
+        showTyping(false);
+
         clearChatStorage();
         chatMessages.querySelectorAll('.wp-chat-message').forEach((message) => message.remove());
 
         sessionId = getStoredThreadId();
         saveThreadId(sessionId);
+        // The list is now empty and the thread is new, so that is what this window
+        // knows about - otherwise the next sync would compare the fresh thread's
+        // empty history against the discarded one's and redraw for nothing.
+        rememberRenderedHistory();
         restoredScrollTop = 0;
         chatMessages.scrollTop = 0;
         pendingGuidedQuestion = null;
@@ -1559,12 +1784,135 @@ ${buildDeleteChatDialogHtml()}
     saveApplicationIdtoSessionStorage();
 
     const existingHistory = loadChatHistory(sessionId);
+
+    /**
+     * What this window last drew, as stored JSON.
+     *
+     * A window renders its messages once and keeps them in the DOM; localStorage is
+     * the only thing the form window and its popups share. So "has anything changed"
+     * cannot be asked of the screen - it has to be asked of storage, against a record
+     * of what this window already knows about.
+     */
+    let renderedHistoryJson = JSON.stringify(existingHistory);
     if (existingHistory.length > 0) {
         renderHistoryEntries(existingHistory, false);
     }
 
     initWebSocket(sessionId);
     restoreConversationHistoryFromBackend(existingHistory.length > 0);
+
+    function rememberRenderedHistory() {
+        renderedHistoryJson = JSON.stringify(loadChatHistory(sessionId));
+    }
+
+    /**
+     * Rebuild the message list from what is stored for the current thread.
+     *
+     * A full redraw rather than appending the difference: every message on screen is
+     * persisted as it is added, so storage is the whole truth about what should be
+     * displayed, and rebuilding from it cannot drift the way a merge can. The typing
+     * indicator and the guided-question list live outside the message nodes, so they
+     * are left alone.
+     *
+     * Unconditional, which is what adopting a new thread needs - there the stored
+     * conversation can happen to match what is on screen and still be a different
+     * conversation. Callers reacting to a change use syncHistoryFromStorage().
+     */
+    function redrawFromStorage() {
+        const history = loadChatHistory(sessionId);
+        renderedHistoryJson = JSON.stringify(history);
+
+        // Someone reading back through the conversation should stay where they were;
+        // someone at the live end should be carried along by what just arrived.
+        const wasAtBottom =
+            chatMessages.scrollHeight - chatMessages.scrollTop - chatMessages.clientHeight < 40;
+        const previousScrollTop = chatMessages.scrollTop;
+
+        chatMessages.querySelectorAll('.wp-chat-message').forEach((message) => message.remove());
+        renderHistoryEntries(history, false);
+
+        chatMessages.scrollTop = wasAtBottom ? chatMessages.scrollHeight : previousScrollTop;
+    }
+
+    /**
+     * Redraw if another window has added to the conversation.
+     *
+     * The popups and the form window share one thread, so a question asked in a
+     * popup belongs to the conversation the form window is showing - but that window
+     * has no reason to know it happened, and until now only a page reload brought it
+     * in. Both windows run this, so it works in either direction.
+     */
+    function syncHistoryFromStorage() {
+        const historyJson = JSON.stringify(loadChatHistory(sessionId));
+        if (historyJson === renderedHistoryJson) return;
+        redrawFromStorage();
+    }
+
+    /**
+     * Move this window onto the thread the shared store now names.
+     *
+     * The thread id lives in localStorage and is shared; `sessionId` is a copy taken
+     * once when this window started. Nothing used to update that copy, so a window
+     * that did not reload went on watching a conversation nobody was writing to -
+     * which is why closing a sub-form directly left the form window behind it empty,
+     * while saving it (a reload, and so a fresh copy) looked fine.
+     *
+     * Returns whether the thread moved, so the caller can redraw on the new one.
+     */
+    function adoptSharedThreadIdIfChanged() {
+        const sharedThreadId = readStoredThreadId();
+        if (!sharedThreadId || sharedThreadId === sessionId) return false;
+
+        // A reply still in flight belongs to the thread being left behind, and
+        // initWebSocket() below drops the old socket's handlers - the only paths that
+        // clear the loading state. Retire it here or the typing dots never stop.
+        chatGeneration += 1;
+        requestInFlight = false;
+        showTyping(false);
+
+        sessionId = sharedThreadId;
+        restoredScrollTop = loadChatScrollPosition(sessionId);
+        // The socket is bound to the id it was opened with, so it has to follow too -
+        // otherwise this window keeps talking into the conversation it just left.
+        initWebSocket(sessionId);
+        refreshGuidedQuestions();
+        return true;
+    }
+
+    /**
+     * localStorage fires this only in the *other* windows, which is exactly the set
+     * that needs to redraw - the window that sent the message already has it.
+     */
+    window.addEventListener('storage', (event) => {
+        // The thread id moving is news in its own right: the conversation this window
+        // should be showing is now under a different key, and this is the one notice
+        // it gets. Ignoring it is what made a reload the only way to recover.
+        if (event.key === null || event.key === THREAD_ID_STORAGE_KEY) {
+            if (adoptSharedThreadIdIfChanged()) {
+                redrawFromStorage();
+                return;
+            }
+        }
+
+        // A null key means the whole store was cleared; anything else is only our
+        // business when it is this thread's history.
+        if (event.key !== null && event.key !== getHistoryStorageKey(sessionId)) return;
+        syncHistoryFromStorage();
+    });
+
+    /**
+     * The storage event is the live path; this is the one that catches up. A popup
+     * closing hands focus back here, and a browser that dropped the event (or never
+     * sent one, as with storage blocked in a private window) gets the same result a
+     * moment later instead of never.
+     */
+    window.addEventListener('focus', () => {
+        // Getting focus back is a sub-form handing over, and the cheapest moment to
+        // ask both questions a reload would have answered: which thread is current,
+        // and has it moved on since this window last drew it.
+        if (adoptSharedThreadIdIfChanged()) redrawFromStorage();
+        else syncHistoryFromStorage();
+    });
 
     function renderHistoryEntries(historyEntries, persist = false) {
         if (!Array.isArray(historyEntries) || historyEntries.length === 0) return;
@@ -1590,6 +1938,7 @@ ${buildDeleteChatDialogHtml()}
         if (socket) {
             // Clear handlers before closing an older socket so its close/error event
             // does not affect the new connection or current chat request state.
+            socket.onopen = null;
             socket.onclose = null;
             socket.onerror = null;
             socket.onmessage = null;
@@ -1597,6 +1946,13 @@ ${buildDeleteChatDialogHtml()}
                 socket.close();
             } catch (error) {
                 console.warn("[WebSocket] Error closing existing connection", error);
+            }
+            // With those handlers gone nothing is left to settle the previous open
+            // promise, so settle it here. A send that landed mid-connect unblocks
+            // through its normal error path instead of awaiting a promise forever.
+            if (socketOpenReject) {
+                socketOpenReject(new Error("WebSocket replaced before it finished connecting."));
+                socketOpenReject = null;
             }
         }
 
@@ -1608,6 +1964,7 @@ ${buildDeleteChatDialogHtml()}
         // Store the open promise so sendMessage() can wait for CONNECTING sockets
         // instead of falling back to the removed legacy HTTP invoke path.
         socketOpenPromise = new Promise((resolve, reject) => {
+            socketOpenReject = reject;
             socket.onopen = function () {
                 console.log("[WebSocket] Connection established for session:", currentSessionId);
                 resolve(socket);
@@ -1624,6 +1981,11 @@ ${buildDeleteChatDialogHtml()}
                 reject(error);
             };
         });
+
+        // Mark the rejection as handled. Callers that need the outcome still await
+        // this promise through ensureWebSocketConnection() and still see the failure;
+        // this only stops an unawaited teardown from logging an unhandled rejection.
+        socketOpenPromise.catch(() => {});
 
         socket.onmessage = function (event) {
             // All assistant responses, session-init system messages, and gateway
@@ -1738,25 +2100,96 @@ ${buildDeleteChatDialogHtml()}
 
     requestAnimationFrame(restoreChatScrollPosition);
 
-    function toggleChat() {
-        const isOpen = chatModal.classList.contains('open');
-        if (!isOpen) {
-            // Opening the chat does a few UI-sync steps together:
-            // 1. show the modal,
-            // 2. hide the floating launcher button,
-            // 3. restore the last saved scroll position on the next paint,
-            // 4. refresh guided questions for the current step,
-            // 5. move keyboard focus into the input so the user can type immediately.
-            chatModal.classList.add('open');
-            chatLauncher.style.display = 'none';
-            requestAnimationFrame(restoreChatScrollPosition);
-            refreshGuidedQuestions();
-            chatInput.focus();
-        } else {
-            chatModal.classList.remove('open');
-            chatLauncher.style.display = 'flex';
+    /**
+     * Opening the chat does a few UI-sync steps together:
+     * 1. show the modal,
+     * 2. hide the floating launcher button,
+     * 3. restore the last saved scroll position on the next paint,
+     * 4. refresh guided questions for the current step,
+     * 5. record the open state, so a popup opened from here can match it,
+     * 6. move keyboard focus into the input so the user can type immediately.
+     *
+     * Step 6 is the one callers differ on. A user who clicked the launcher is asking
+     * to type; a popup opening the chat on its own is not, and pulling focus out of
+     * the sub-form the user came here to fill in would be a theft.
+     */
+    function openChat({ focusInput = true } = {}) {
+        chatModal.classList.add('open');
+        chatLauncher.style.display = 'none';
+        // The panel has been display: none until now, so it had no size to be
+        // clamped against - this is the first moment its saved position can be
+        // checked against the window it is actually opening into.
+        modalDrag.refresh();
+        requestAnimationFrame(restoreChatScrollPosition);
+        refreshGuidedQuestions();
+        saveChatOpenState(true);
+        // Opening the assistant is one of the three things that close the helper
+        // message. Without this the launcher is only hidden, and would come back
+        // still carrying the message when the chat is closed again. suppressHover is
+        // off because the launcher leaves the screen, so no pointerleave would
+        // arrive to clear the suppression.
+        launcher.hideTooltip({ suppressHover: false });
+        if (isPopup) {
+            // The launcher notice asked for exactly this, so it has nothing left to
+            // ask; the banner repeats it where the user is now looking, and adds the
+            // one thing the tooltip could not offer - a button that resizes the
+            // window. Both show once per popup and guard that themselves.
+            launcher.hideNotice();
+            popupCallout.show();
         }
+        if (focusInput) chatInput.focus();
     }
+
+    function closeChat() {
+        chatModal.classList.remove('open');
+        chatLauncher.style.display = 'flex';
+        // Same again for the launcher, which was the hidden one until this moment.
+        launcherDrag.refresh();
+        saveChatOpenState(false);
+    }
+
+    function toggleChat() {
+        if (chatModal.classList.contains('open')) closeChat();
+        else openChat();
+    }
+
+    document.addEventListener(FORM_UPDATE_COMPLETE_EVENT, () => {
+        if (!chatModal.classList.contains('open')) toggleChat();
+    });
+
+    /**
+     * Reopen whatever the user had open.
+     *
+     * A postback is not the user closing the chat, so the chat should not come back
+     * closed - selecting a value in a dropdown reloads the page underneath them, and
+     * an assistant that vanishes each time reads as one that has quit.
+     *
+     * The same line covers a popup whose opener was mid-conversation, because a popup
+     * starts from its opener's record: either way the answer is "the chat was open
+     * where this user last was". In a popup, openChat() also brings up the banner
+     * explaining that the conversation carried over; when the form window's chat was
+     * closed, nothing opens and the launcher carries that message instead.
+     *
+     * Focus is left where the form put it. The user is working in the form, and a
+     * reload is not a request to start typing at the assistant.
+     */
+    if ((chatWasOpenHere || parentChatWasOpen) && !chatModal.classList.contains('open')) {
+        openChat({ focusInput: false });
+    }
+
+    /**
+     * Follow the form's own blocking.
+     *
+     * Posse freezes the fields behind a popup, and the assistant floating over them
+     * has to freeze with them - otherwise it keeps taking questions, and offering to
+     * fill in, a form the user cannot currently act on.
+     *
+     * Every window does both halves: it tells its own opener that it exists, and
+     * watches for popups opened from itself. A sub-form can open a sub-form, and the
+     * window in the middle is then as blocked as the one below it.
+     */
+    if (isPopup) announceToOpener();
+    watchForOpenPopups((anyPopupOpen) => popupBlock.setBlocked(anyPopupOpen));
 
     chatButton.addEventListener('click', toggleChat);
     closeBtn.addEventListener('click', toggleChat);
@@ -1833,15 +2266,13 @@ ${buildDeleteChatDialogHtml()}
     * does not overwrite the most up-to-date guided-question list in the UI.
     */
     async function refreshGuidedQuestions() {
-        if (!GUIDED_QUESTIONS_ENABLED) return;
-
         const stepId = getCurrentFormStepFromDom();
         const requestToken = ++guidedQuestionsRequestToken;
 
         try {
             // Filter on the client as a final guard so answered prompts stay hidden after refresh.
             const answeredQuestionIds = new Set(loadAnsweredGuidedQuestionIds(sessionId, stepId));
-            const guidedQuestions = await fetchGuidedQuestions(stepId, GUIDED_QUESTIONS_API_URL);
+            const guidedQuestions = await fetchGuidedQuestions(stepId);
 
             if (requestToken !== guidedQuestionsRequestToken) return;
 
@@ -1889,6 +2320,11 @@ ${buildDeleteChatDialogHtml()}
         // Show the loading state and temporarily disable interaction until the request finishes.
         showTyping(true);
 
+        // The conversation can be deleted while this send is still awaiting the
+        // socket, so anything past the await has to confirm it is still the current
+        // chat before touching shared request state or the message list.
+        const generation = chatGeneration;
+
         try {
             const currentStep = getCurrentFormStepFromDom();
             console.log(`Invoking orchestrator with sessionId=${sessionId}, step=${currentStep}, query=${text}`);
@@ -1900,9 +2336,17 @@ ${buildDeleteChatDialogHtml()}
             // Always send through WebSocket. The legacy HTTP invoke fallback was
             // removed so the frontend talks only to the API backend gateway.
             await ensureWebSocketConnection();
+            if (generation !== chatGeneration) return;
             invokeAPIWithWS(text, currentStep, sessionId);
 
         } catch (error) {
+            if (generation !== chatGeneration) {
+                // The chat this send belonged to was deleted mid-flight. Its failure is
+                // expected, and deleteChat() has already cleared the loading state, so
+                // this must not add an error bubble to the fresh conversation.
+                console.warn("[WebSocket] Discarded a request from a deleted chat", error);
+                return;
+            }
             // Request-level failure:
             // restore the clicked guided question because it was never successfully answered,
             // reset the loading state, and show a generic system error in the chat.
@@ -1975,6 +2419,10 @@ ${buildDeleteChatDialogHtml()}
         }
         if (persist) {
             appendChatHistory(sessionId, role, String(text));
+            // This window has just written what it is already showing. Without this,
+            // the next sync would read its own message back as news from elsewhere
+            // and redraw the list underneath the user.
+            rememberRenderedHistory();
         }
         if (scroll) {
             // If an assistant or system message was just added, scroll to the last user message so the user sees their own question above the reply.

@@ -1,0 +1,59 @@
+{
+  "formName": "Youth In Care Records (As Child/Youth)",
+  "formDescription": "Sub-screen for the 'youthincarechild' request topic. Lets the applicant, requesting as a child/youth in care or receiving services, select which record types they want. Youth justice records specifically cannot be processed under FOIPPA and must be requested directly from the Ministry of Children and Family Development by mail.",
+  "sourceComponent": "web/src/app/route-components/youthincare-child/youthincare-child.component.ts",
+  "formFields": {
+    "youth_in_care_child_selection": {
+      "type": "selectboxes",
+      "id": "youthincarechildselection",
+      "title": "Select the corresponding types of records you would like to receive in your request",
+      "description": "The more selected, the larger the resulting request. Each main option, once checked, reveals its own set of record-type sub-options (each with an info tooltip describing that record type in the UI).",
+      "required": true,
+      "hierarchical": true,
+      "options": [
+        {
+          "label": "Child in Care Records",
+          "value": "Child in Care Records",
+          "suboptions": [
+            "Personal History, Recordings & Service Plans", "Cultural Planning / Roots", "Legal & Agreements",
+            "Financial Documentation", "External Assessment & Reports", "Medical", "Internal Assessments",
+            "Reviews", "Adoption", "Out of Care Services", "General Correspondence",
+            "Collaborative Planning & Decisions Making", "Education, Employment & Training", "Case Notes"
+          ]
+        },
+        {
+          "label": "Child and Youth Mental Health Records",
+          "value": "Child and Youth Mental Health Records",
+          "suboptions": [
+            "Clinical History", "Complex Care Intervention", "Assessment & Reports",
+            "Psychological Test Protocols & Rough Notes", "Clinician’s Standardized Questionnaires & Rough Notes",
+            "Artwork & Photos", "Child & Youth Mental Health Case Files ", "Case Notes"
+          ]
+        },
+        {
+          "label": "Child and Youth Special Needs Records",
+          "value": "Child and Youth Special Needs Records",
+          "suboptions": [
+            "Personal History & Recording", "Intake / Service Request & Memo", "Legal and Financial Documentation ",
+            "Reports", "Correspondence", "At Home Program Legal & Financial", "Autism Funding",
+            "Respite Benefits", "Case Notes"
+          ]
+        },
+        {
+          "label": "Youth Agreement",
+          "value": "Youth Agreement",
+          "suboptions": [
+            "Personal History & Recordings", "Service Request & Memo", "Agreements", "Reports",
+            "Financial Documentation", "Program Planning Documentation", "Case Notes"
+          ]
+        },
+        {
+          "label": "Other",
+          "value": "Other",
+          "suboptions": []
+        }
+      ]
+    }
+  },
+  "notes": "Main/sub options are loaded dynamically from web/src/app/services/data.json (referenceData.youthincarechild). Component's FormGroup also declares unused boolean fields (ischildincardrecords, ismentalhealthrecords, isspecialneedsrecords, isyouthagreement, isyouthjustice, isother) that are not bound to any template control."
+}

@@ -1,0 +1,20 @@
+name: Deploy FOI Demo Tenant
+
+on:
+  push:
+    branches:
+      - dev
+      # - test
+      # - main
+    paths:
+      - 'src/tenant/foi-demo/**'
+      - '.github/workflows/deploy-tenant-reusable.yml'
+      - '.github/workflows/deploy-foi-demo.yml'
+
+jobs:
+  deploy-foi-demo:
+    uses: ./.github/workflows/deploy-tenant-reusable.yml
+    secrets: inherit
+    with:
+      tenant: foi-demo
+      deployment_environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name }}

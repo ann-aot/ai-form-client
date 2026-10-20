@@ -1,0 +1,33 @@
+{
+  "formName": "Youth In Care Records (As Parent)",
+  "formDescription": "Sub-screen for the 'youthincareparent' request topic. Lets the applicant, requesting as the parent of a child/youth in care or receiving services, select which record types they want.",
+  "sourceComponent": "web/src/app/route-components/youthincare-parent/youthincare-parent.component.ts",
+  "formFields": {
+    "youth_in_care_parent_selection": {
+      "type": "selectboxes",
+      "id": "youthincareparentselection",
+      "title": "Select the corresponding types of records you would like to receive in your request",
+      "description": "The more selected, the larger the resulting request. Each main option, once checked, reveals its own set of record-type sub-options (each with an info tooltip describing that record type in the UI).",
+      "required": true,
+      "hierarchical": true,
+      "options": [
+        {
+          "label": "Child Protection Investigation Records (Family Service File)",
+          "value": "Child Protection Investigation Records (Family Service File)",
+          "suboptions": [
+            "Personal History and Recording", "Intake & Incident, Service Request & Memo", "Legal & Agreements",
+            "Financial Documentation", "External Assessment & Reports", "Medical",
+            "Internal Assessments & Service Plans", "Reviews", "Adoption", "Out of Care Services",
+            "General Correspondence", "Collaborative Planning & Decisions Making", "Case Notes"
+          ]
+        },
+        {
+          "label": "Other",
+          "value": "Other",
+          "suboptions": []
+        }
+      ]
+    }
+  },
+  "notes": "Main/sub options are loaded dynamically from web/src/app/services/data.json (referenceData.youthincareparent)."
+}

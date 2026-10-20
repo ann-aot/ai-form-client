@@ -1,0 +1,7 @@
+{
+  "tenant": "chefs1",
+  "entry": "src/tenant/chefs1/index.js",
+  "shared": "src/shared/index.js",
+  "output": "client.js",
+  "builtAt": "2026-07-16T23:07:12.699Z"
+}

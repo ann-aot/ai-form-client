@@ -1,0 +1,75 @@
+{
+  "formName": "Ways To Get In Touch With You",
+  "formDescription": "Collects the applicant's preferred contact methods, used to follow up on the request and deliver records. At least one form of contact (a phone number, an email, or a complete mailing address) must be provided, though no single field is individually marked required.",
+  "sourceComponent": "web/src/app/route-components/contact-info-options/contact-info-options.component.ts",
+  "formFields": {
+    "phone_primary": {
+      "type": "text",
+      "id": "phonePrimary",
+      "title": "Phone number (primary)",
+      "description": "Applicant's primary phone number.",
+      "required": false,
+      "minLength": 10,
+      "maxLength": 25
+    },
+    "phone_secondary": {
+      "type": "text",
+      "id": "phoneSecondary",
+      "title": "Phone number (secondary)",
+      "description": "Applicant's secondary phone number.",
+      "required": false,
+      "minLength": 10,
+      "maxLength": 25
+    },
+    "email": {
+      "type": "text",
+      "id": "email",
+      "title": "Email address",
+      "description": "Required for electronic delivery of the response package. Pre-filled and disabled when authenticated via BC Services Card (changed via the BC Services Card account instead).",
+      "required": false,
+      "maxLength": 255,
+      "pattern": "\\S+@\\S+\\.\\S"
+    },
+    "address": {
+      "type": "text",
+      "id": "address",
+      "title": "Address",
+      "description": "Applicant's mailing address street line.",
+      "required": false,
+      "maxLength": 255
+    },
+    "city": {
+      "type": "text",
+      "id": "city",
+      "title": "City",
+      "description": "Applicant's mailing address city.",
+      "required": false,
+      "maxLength": 255
+    },
+    "province": {
+      "type": "text",
+      "id": "province",
+      "title": "Province/State",
+      "description": "Applicant's mailing address province or state.",
+      "required": false,
+      "maxLength": 255
+    },
+    "country": {
+      "type": "text",
+      "id": "country",
+      "title": "Country",
+      "description": "Applicant's mailing address country.",
+      "required": false,
+      "maxLength": 255
+    },
+    "postal": {
+      "type": "text",
+      "id": "postal",
+      "title": "Postal/ZIP code",
+      "description": "Applicant's mailing address postal or ZIP code.",
+      "required": false,
+      "maxLength": 255
+    }
+  },
+  "notes": "At least one of: email, phonePrimary, phoneSecondary, or a complete address (all of address/city/province/country/postal) must be provided to continue; enforced in component logic, not per-field validators."
+}

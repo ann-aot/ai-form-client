@@ -1,0 +1,55 @@
+{
+  "formName": "Complete Your Profile",
+  "formDescription": "Identity/profile step for personal-information requests. Collects the applicant's legal name and (for some request topics) date of birth. When the applicant is authenticated via BC Services Card, first/last name are pre-filled and locked (shown read-only, sourced from the card) and the applicant only fills in the remaining fields.",
+  "sourceComponent": "web/src/app/route-components/verify-your-identity/verify-your-identity.component.ts",
+  "formFields": {
+    "first_name": {
+      "type": "text",
+      "id": "firstName",
+      "title": "First name / Given names",
+      "description": "Applicant's legal first name. Pre-filled and disabled when authenticated via BC Services Card.",
+      "required": true,
+      "maxLength": 255
+    },
+    "middle_name": {
+      "type": "text",
+      "id": "middleName",
+      "title": "Middle name",
+      "description": "Applicant's legal middle name, if any. Only shown when not authenticated via BC Services Card.",
+      "required": false,
+      "maxLength": 255
+    },
+    "last_name": {
+      "type": "text",
+      "id": "lastName",
+      "title": "Last name",
+      "description": "Applicant's legal last name. Pre-filled and disabled when authenticated via BC Services Card.",
+      "required": true,
+      "maxLength": 255
+    },
+    "also_known_as": {
+      "type": "text",
+      "id": "alsoKnownAs",
+      "title": "Also known as",
+      "description": "Any other name(s) the applicant is or was known by.",
+      "required": false,
+      "maxLength": 255
+    },
+    "birth_date": {
+      "type": "date",
+      "id": "birthDate",
+      "title": "Birth Date",
+      "description": "Applicant's date of birth. Only shown/required for certain request topics (e.g. personal information requests where the ministry needs it to verify identity). Must not be a future date.",
+      "required": false
+    },
+    "business_name": {
+      "type": "text",
+      "id": "businessName",
+      "title": "Business/Organization name",
+      "description": "If applicable, the business or organization the applicant represents. Law firms should identify whether they represent the client in this request or someone else, and include a file number where possible.",
+      "required": false,
+      "maxLength": 255
+    }
+  },
+  "notes": "birth_date's required/visible state is toggled at runtime via route data (includeBirthDate) rather than being static per-route."
+}
