@@ -36,7 +36,10 @@ let clientInstance = localStorage.getItem('clientInstance');
     const GUIDED_QUESTIONS_ENABLED = false;
 
     const clientId = 'f72dc03c-d4c0-4422-8f61-233af3e24bc9';
-    const API_BACKEND_BASE_URL = 'https://nraif-671b-dev-commonservi-api.livelymushroom-b9ecaae0.canadacentral.azurecontainerapps.io';
+    // dev
+    // const API_BACKEND_BASE_URL = 'https://nraif-671b-dev-commonservi-api.livelymushroom-b9ecaae0.canadacentral.azurecontainerapps.io';
+    // test
+    const API_BACKEND_BASE_URL = 'https://nraif-671b-test-api.redground-c9aa9e63.canadacentral.azurecontainerapps.io';
 
 
     const CONVERSATION_HISTORY_API_URL = new URL(`/tenants/${clientId}/history`, API_BACKEND_BASE_URL).toString();
