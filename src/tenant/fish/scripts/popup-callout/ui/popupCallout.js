@@ -36,7 +36,7 @@ export const POPUP_CALLOUT_CONTENT = {
     action: 'Expand to see more of the form',
     // Added below the button when the browser declines to resize the window. Its own
     // line rather than a rewrite of the hint, which says nothing about size.
-    actionFallback: 'Your browser would not resize the window. Drag its edge instead.',
+    actionFallback: 'Drag the edge of the form window to resize it.',
     dismissLabel: 'Dismiss this message'
 };
 
