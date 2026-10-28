@@ -29,6 +29,8 @@ import { buildPopupCalloutHtml, createPopupCallout, POPUP_LAUNCHER_NOTICE } from
 import { announceToOpener, watchForOpenPopups } from './shared/popupPresence.js';
 import { POPUP_BLOCK_STYLES } from './popup-block/styles/popupBlockStyles.js';
 import { buildPopupBlockHtml, createPopupBlock } from './popup-block/ui/popupBlock.js';
+import { CHAT_MARKDOWN_STYLES } from './chat-markdown/styles/chatMarkdownStyles.js';
+import { formatMessage, formatMessageBlocks } from './chat-markdown/utils/markdownRenderer.js';
 
 /**
  * Allow testing of alternative javascript
@@ -1287,47 +1289,7 @@ function injectStyles() {
             padding: 6px 10px;
         }
 
-        .wp-chat-bubble a {
-            color: var(--wp-welcome-accent);
-            text-decoration: underline;
-        }
-
-        /* The same ExtJS reset that flattens list markers also lists strong among
-           the elements it forces back to normal weight, so a heading rendered from
-           **bold** arrives unstyled unless the weight is restated here. Matches
-           .wp-welcome-heading, which sets its weight explicitly for that reason.
-           (The reset clears font-style on em too - worth restating the same way if
-           italics ever start appearing in replies.) */
-        .wp-chat-bubble strong,
-        .wp-chat-bubble b {
-            font-weight: 700;
-        }
-
-        /* One section of a reply - a heading with its paragraphs or list. Sections
-           are the bubble's flex children, so the gap above separates them while
-           lines within one stay tight, mirroring .wp-welcome-section. */
-        .wp-chat-block p {
-            margin: 0;
-        }
-
-        /* The <ul> draws the bullet glyphs; no bullet characters live in the text.
-           The host form loads ExtJS, whose stylesheet carries a bare element-level
-           reset setting list-style to none on every li. Inheriting the marker from
-           the ul is not enough to beat a rule that targets li directly, so both the
-           list and the item restate it - these selectors outrank a bare element
-           selector. display: list-item guards against a host reset that would
-           otherwise flatten items to blocks. */
-        .wp-chat-bubble ul {
-            margin: 4px 0 0;
-            padding-left: 20px;
-            list-style: disc outside;
-        }
-
-        .wp-chat-bubble li {
-            margin: 4px 0;
-            display: list-item;
-            list-style: disc outside;
-        }
+        ${CHAT_MARKDOWN_STYLES}
 
         .wp-chat-typing {
             display: none;
@@ -2442,104 +2404,6 @@ ${buildPopupBlockHtml()}
                 scrollToBottom();
             }
         }
-    }
-
-    function formatMessage(text) {
-        // Replace any special aggregator placeholder with the FrontCounter BC link before rendering.
-        const FRONTCOUNTER_PLACEHOLDER = '-FRONTCOUNTER-BC-';
-        const FRONTCOUNTER_LINK = '[FrontCounter BC](https://www2.gov.bc.ca/gov/content/industry/natural-resource-use/natural-resource-permits#:~:text=gov.bc.ca-,Contact%20information,-FrontCounter%20BC)';
-        const normalizedText = String(text).replaceAll(FRONTCOUNTER_PLACEHOLDER, FRONTCOUNTER_LINK);
-
-        // Step 1: Extract Markdown links [text](url) before escaping so URLs are preserved intact.
-        // Replace them with placeholders to protect them from HTML escaping and plain-URL detection.
-        const mdLinkPlaceholders = [];
-        let processed = normalizedText.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (_, linkText, url) => {
-            const idx = mdLinkPlaceholders.length;
-            mdLinkPlaceholders.push(`<a href="${url}" target="_blank" rel="noopener noreferrer">${linkText}</a>`);
-            return `\x00MDLINK${idx}\x00`;
-        });
-
-        // Step 2: Extract plain URLs (http/https and www.) before escaping.
-        const plainUrlPlaceholders = [];
-        // Match http(s):// URLs and www. URLs not already inside a Markdown link
-        processed = processed.replace(/(?<!\x00MDLINK\d*)(https?:\/\/[^\s<>"]+|www\.[^\s<>"]+)/g, (url) => {
-            const idx = plainUrlPlaceholders.length;
-            const href = url.startsWith('http') ? url : `https://${url}`;
-            plainUrlPlaceholders.push(`<a href="${href}" target="_blank" rel="noopener noreferrer">${url}</a>`);
-            return `\x00PLAINURL${idx}\x00`;
-        });
-
-        // Step 3: HTML-escape the remaining text (safe � placeholders use \x00 which won't be escaped)
-        let formatted = processed
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
-
-        // Step 4: Apply remaining Markdown formatting
-        formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-        formatted = formatted.replace(/\n/g, '<br>');
-        formatted = formatted.replace(/^[\u2022\-]\s+(.+)/gm, '<li>$1</li>');
-
-        // Step 5: Restore placeholders
-        formatted = formatted.replace(/\x00MDLINK(\d+)\x00/g, (_, i) => mdLinkPlaceholders[Number(i)]);
-        formatted = formatted.replace(/\x00PLAINURL(\d+)\x00/g, (_, i) => plainUrlPlaceholders[Number(i)]);
-
-        if (formatted.includes('<li>')) {
-            formatted = `<ul>${formatted}</ul>`;
-        }
-        return formatted;
-    }
-
-    /**
-     * Block-level renderer for assistant replies.
-     *
-     * formatMessage() is inline-only for this purpose: it turns newlines into <br>
-     * before its bullet regex runs, so the ^ anchor can only match the very first
-     * line, and anything it does match wraps the whole message - headings included -
-     * in one <ul>. Replies are commonly several headed sections each with a list, so
-     * the structure has to be built here instead.
-     *
-     * Shape of the source text:
-     *   - a blank line starts a new section (rendered tight inside, spaced between)
-     *   - a line opening with "- " or "* " is a list item; consecutive items group
-     *     into one <ul>, which is what draws the bullet markers
-     *   - every other line is a paragraph
-     *
-     * Inline formatting (escaping, **bold**, links) is delegated to formatMessage so
-     * both renderers treat the text identically. Output is a pure function of the
-     * message text and role, both of which are persisted, so a reload reproduces the
-     * reply exactly.
-     */
-    function formatMessageBlocks(text) {
-        return String(text)
-            .split(/\n\s*\n/)
-            .map((section) => {
-                let html = '';
-                let listItems = [];
-
-                function flushList() {
-                    if (listItems.length === 0) return;
-                    html += `<ul>${listItems.join('')}</ul>`;
-                    listItems = [];
-                }
-
-                section.split('\n').forEach((line) => {
-                    const trimmed = line.trim();
-                    if (!trimmed) return;
-                    const listItem = trimmed.match(/^[-*•]\s+(.*)$/);
-                    if (listItem) {
-                        listItems.push(`<li>${formatMessage(listItem[1])}</li>`);
-                        return;
-                    }
-                    // A paragraph closes any run of items above it.
-                    flushList();
-                    html += `<p>${formatMessage(trimmed)}</p>`;
-                });
-                flushList();
-
-                return html ? `<div class="wp-chat-block">${html}</div>` : '';
-            })
-            .join('');
     }
 
     function showTyping(show) {
