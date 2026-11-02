@@ -8,6 +8,7 @@ on:
       # - main
     paths:
       - 'src/tenant/foi-demo/**'
+      - '!src/tenant/foi-demo/rag/**'
       - '.github/workflows/deploy-tenant-reusable.yml'
       - '.github/workflows/deploy-foi-demo.yml'
 

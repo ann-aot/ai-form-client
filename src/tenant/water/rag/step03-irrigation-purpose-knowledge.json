@@ -1,0 +1,90 @@
+{
+  "rag_system": "step3_add_purpose_irrigation",
+  "version": "2.0",
+  "type": "knowledge",
+  "description": "Guidance for the 'Add Purpose - Irrigation' step in a Water Licence Application. Covers sub-purpose selection, quantity calculation rules, and data entry guidance only for Irrigation.",
+  "topic": "Add Purpose - Irrigation",
+  "purpose_category": "Irrigation",
+  "sub_purposes": [
+    {
+      "name": "Irrigation",
+      "explanation": "Water is used for irrigation purposes other than those provided by a local provider."
+    },
+    {
+      "name": "Irrigation - Water conveyed by local provider",
+      "explanation": "Water is supplied by a local provider for irrigation purposes within the local provider's service area.",
+      "notes": "Select this sub-purpose when water is supplied by a local provider. See the definition of 'local provider' in the Water Sustainability Fees, Rentals and Charges Tariff Regulation.",
+      "references": [
+        {
+          "title": "Water Sustainability Fees, Rentals and Charges Tariff Regulation",
+          "url": "https://www.bclaws.gov.bc.ca/civix/document/id/complete/statreg/37_2016#section1"
+        }
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "rule_id": "rule_001",
+      "name": "Irrigation Quantity Calculation Guidance",
+      "trigger_conditions": [
+        "User asks about total annual quantity",
+        "User asks for irrigation water calculation",
+        "User asks how to calculate irrigation water requirements",
+        "User asks how to determine required quantity",
+        "User asks for irrigation help with calculations",
+        "User asks how to calculate irrigation quantity",
+        "User asks for irrigation water quantity assistance",
+        "User asks about total annual quantity for irrigation"
+      ],
+      "instruction": "Direct the user to use the BC Agriculture Water Calculator to help determine the required irrigation water quantity.",
+      "response_guidance": "Use the BC Agriculture Water Calculator to help determine your irrigation water requirements and total annual quantity.",
+      "applies_to": {
+        "purpose": "Irrigation",
+        "sub_purposes": [
+          "Irrigation",
+          "Irrigation - Water conveyed by local provider"
+        ]
+      },
+      "references": [
+        {
+          "title": "BC Agriculture Water Calculator",
+          "url": "https://bcwatercalculator.ca/agriculture/welcome"
+        }
+      ]
+    },
+    {
+      "rule_id": "rule_002",
+      "name": "Unit Conversion Guidance",
+      "trigger_conditions": [
+        "User asks how to convert units",
+        "User asks about unit conversion",
+        "User wants to convert cubic metres to litres",
+        "User wants to convert litres to cubic metres",
+        "User asks about converting water measurement units",
+        "User needs help with unit conversion"
+      ],
+      "instruction": "Direct the user to use the BC Government Unit Converter tool for any unit conversion needs.",
+      "response_guidance": "Use the BC Government Unit Converter to convert between water measurement units.",
+      "applies_to": {
+        "purpose": "Irrigation",
+        "sub_purposes": [
+          "Irrigation",
+          "Irrigation - Water conveyed by local provider"
+        ]
+      },
+      "references": [
+        {
+          "title": "Unit Converter",
+          "url": "https://unit-converter.nrs.gov.bc.ca/"
+        }
+      ]
+    },
+    {
+      "rule_id": "rule_003",
+      "name": "Irrigated Area Data Entry Guidance",
+      "instruction": "Applicants must enter only the irrigated area size, not the total land size.",
+      "warning": "Do not enter entire land parcel size if only a portion is irrigated.",
+      "reason": "Using total land size instead of irrigated area may result in incorrect water requirement calculations."
+    }
+  ]
+}

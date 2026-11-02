@@ -1,0 +1,261 @@
+{
+    "document_type": "joint_works_agreement_guideline",
+    "version": "3.0",
+    "global_summary": "A Joint Works Agreement is a structured legal contract between multiple water license holders or land occupants who jointly construct and manage shared water infrastructure. It defines the parties involved, their water rights, cost-sharing percentages, operational responsibilities, governance through a manager, usage restrictions, land access rights, dispute resolution mechanisms, and legal continuity. It ensures coordinated development and maintenance of shared water systems while preventing misuse and defining enforceable obligations for all parties.",
+    "form_fields": {
+        "agreement_header": {
+            "agreement_date": "string (Day, Month, Year required)",
+            "execution_day": "string",
+            "execution_month": "string",
+            "execution_year": "string"
+        },
+        "parties": {
+            "number_of_parties": "integer (minimum 2)",
+            "party": {
+                "full_legal_name": "string (required)",
+                "full_mailing_address": "string (required)"
+            }
+        },
+        "water_rights_section": {
+            "lawful_occupant_description": "string (required for each party)",
+            "property_description": "string (land/lot details required)",
+            "conditional_water_licence_number": "string (required)",
+            "authorized_water_volume": "string or numeric (required)",
+            "water_source": "string (river/creek/lake name)"
+        },
+        "purpose_section": {
+            "joint_works_description": "string (required purpose of shared system)",
+            "intent_statement": "string (construction and operation intent)"
+        },
+        "infrastructure_details": {
+            "works_type": "string (ditch, pipe, flume, diversion box, etc.)",
+            "intake_location": "string (source point description)",
+            "system_route_description": "string (path of water system)",
+            "destination_lots": "string (lot numbers / land parcels)",
+            "map_reference": "string (sketch/map name if applicable)"
+        },
+        "cost_sharing": {
+            "party_construction_percentage": "number (0–100 per party)",
+            "party_maintenance_percentage": "number (0–100 per party)",
+            "cost_categories": [
+                "construction",
+                "maintenance",
+                "repair",
+                "renewal",
+                "operation"
+            ]
+        },
+        "water_usage_restrictions": {
+            "max_allowed_usage_per_party": "string (licensed limit)",
+            "prohibited_use_lands": "string (non-authorized land restriction)",
+            "compliance_rule": "boolean (must comply with licence terms)"
+        },
+        "manager_section": {
+            "manager_name": "string (appointed manager)",
+            "manager_powers": [
+                "construction control",
+                "maintenance authority",
+                "financial collection",
+                "water shutoff authority",
+                "system operation control"
+            ],
+            "financial_management_rules": "string (advance levy or reimbursement model)",
+            "reporting_requirement": "string (annual statement requirement)",
+            "appointment_term_end_date": "date",
+            "replacement_process": "string (majority vote procedure)"
+        },
+        "access_rights": {
+            "land_access_permission": "boolean (must be true)",
+            "authorized_personnel_access": "boolean",
+            "permitted_activities": [
+                "construction",
+                "maintenance",
+                "repair",
+                "operation",
+                "inspection"
+            ]
+        },
+        "property_transfer": {
+            "sale_notification_required": "boolean",
+            "buyer_assumption_clause_required": "boolean",
+            "continuity_obligation": "boolean"
+        },
+        "dispute_resolution": {
+            "authority_body": "string (Engineer under Water Act)",
+            "jurisdiction": "string (Water District)",
+            "decision_finality": "boolean (true)"
+        },
+        "legal_binding": {
+            "heirs_and_assigns_bound": "boolean",
+            "legal_continuity": "boolean"
+        },
+        "agreement_term": {
+            "start_date": "string",
+            "end_date": "string (required)",
+            "duration_type": "string (fixed term)"
+        },
+        "signatures": {
+            "number_of_witnesses": "integer",
+            "party_signature_required": "boolean",
+            "witness_signature_required": "boolean",
+            "execution_clause": "SIGNED, SEALED AND DELIVERED"
+        }
+    },
+    "chunks": [
+        {
+            "chunk_id": "intro_001",
+            "title": "Purpose of Joint Works Agreement",
+            "content": "A Joint Works Agreement is a legal document used when multiple parties jointly construct, operate, and maintain shared infrastructure such as water diversion or irrigation systems. It defines ownership, responsibilities, cost-sharing, usage limits, and dispute resolution procedures.",
+            "keywords": [
+                "joint works agreement",
+                "purpose",
+                "water system",
+                "irrigation",
+                "legal document"
+            ]
+        },
+        {
+            "chunk_id": "header_002",
+            "title": "Agreement Header",
+            "content": "The agreement begins with the execution date in the format: 'Agreement made this ___ day of __________, 20____.'",
+            "keywords": [
+                "header",
+                "date",
+                "execution"
+            ]
+        },
+        {
+            "chunk_id": "parties_003",
+            "title": "Identification of Parties",
+            "content": "Each party must be listed with full legal name and mailing address.",
+            "keywords": [
+                "parties",
+                "name",
+                "address",
+                "water licensee"
+            ]
+        },
+        {
+            "chunk_id": "whereas_004",
+            "title": "WHEREAS Background Clauses",
+            "content": "Defines land ownership, water licence number, authorized water volume, and water source for each party.",
+            "keywords": [
+                "water licence",
+                "land",
+                "rights",
+                "source"
+            ]
+        },
+        {
+            "chunk_id": "purpose_005",
+            "title": "Purpose and Intent",
+            "content": "Parties agree to construct and operate joint works for water diversion and distribution.",
+            "keywords": [
+                "intent",
+                "joint works",
+                "water diversion"
+            ]
+        },
+        {
+            "chunk_id": "infrastructure_006",
+            "title": "Infrastructure Description",
+            "content": "Defines physical system including intake, diversion box, flumes, pipes, and mapped routes.",
+            "keywords": [
+                "infrastructure",
+                "flume",
+                "ditch",
+                "pipeline"
+            ]
+        },
+        {
+            "chunk_id": "cost_sharing_007",
+            "title": "Cost Sharing Obligations",
+            "content": "Defines percentage-based cost sharing for construction and ongoing maintenance.",
+            "keywords": [
+                "cost",
+                "percentage",
+                "maintenance"
+            ]
+        },
+        {
+            "chunk_id": "water_limits_008",
+            "title": "Water Usage Restrictions",
+            "content": "Restricts usage to licensed volume and approved land only.",
+            "keywords": [
+                "restriction",
+                "water limit",
+                "compliance"
+            ]
+        },
+        {
+            "chunk_id": "manager_009",
+            "title": "Manager Authority",
+            "content": "Manager controls operations, maintenance, financial collection, and enforcement including water shutoff.",
+            "keywords": [
+                "manager",
+                "authority",
+                "control"
+            ]
+        },
+        {
+            "chunk_id": "access_010",
+            "title": "Access Rights",
+            "content": "Grants access to land for maintenance and operation of water system.",
+            "keywords": [
+                "access",
+                "land use",
+                "entry"
+            ]
+        },
+        {
+            "chunk_id": "transfer_011",
+            "title": "Property Transfer Obligations",
+            "content": "Requires disclosure of agreement during land sale and transfer of obligations to new owners.",
+            "keywords": [
+                "transfer",
+                "sale",
+                "obligation"
+            ]
+        },
+        {
+            "chunk_id": "dispute_012",
+            "title": "Dispute Resolution",
+            "content": "All disputes are resolved by Water Act Engineer, whose decision is final.",
+            "keywords": [
+                "dispute",
+                "engineer",
+                "final decision"
+            ]
+        },
+        {
+            "chunk_id": "binding_013",
+            "title": "Binding Effect",
+            "content": "Agreement binds heirs, executors, administrators, and assigns.",
+            "keywords": [
+                "binding",
+                "heirs",
+                "legal continuity"
+            ]
+        },
+        {
+            "chunk_id": "term_014",
+            "title": "Term of Agreement",
+            "content": "Agreement remains valid until specified end date.",
+            "keywords": [
+                "term",
+                "duration",
+                "expiry"
+            ]
+        },
+        {
+            "chunk_id": "signature_015",
+            "title": "Signatures",
+            "content": "Agreement must be signed by all parties and witnessed.",
+            "keywords": [
+                "signature",
+                "witness",
+                "execution"
+            ]
+        }
+    ]
+}

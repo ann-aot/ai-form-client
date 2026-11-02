@@ -1,0 +1,203 @@
+{
+  "rag_system": "step5_joint_works_agreement",
+  "version": "2.0",
+  "type": "knowledge",
+  "description": "Knowledge base for the Joint Works Agreement in Step 5 (Document Upload) of a Water Licence Application. Covers definition, who needs it, legal basis, requirements, and support contacts.",
+  "source_document": {
+    "title": "Information on Completing a Joint Works Agreement",
+    "type": "regulatory_document",
+    "url": "https://www2.gov.bc.ca/assets/gov/environment/air-land-water/water/water-licensing-and-rights/joint_works_agreement_water_licence.pdf"
+  },
+  "global_rule": {
+    "instruction": "Whenever responding to any question related to a Joint Works Agreement, always include the Support and Contact Information (jwa_011) at the end of the response.",
+    "always_append": [
+      "jwa_011",
+      "jwa_014"
+    ]
+  },
+  "knowledge_items": [
+    {
+      "id": "jwa_001",
+      "section": "Definition",
+      "title": "What is a Joint Works Agreement",
+      "keywords": [
+        "what is joint works agreement",
+        "water sustainability act agreement",
+        "shared water infrastructure",
+        "joint construction works",
+        "cost sharing water licence"
+      ],
+      "content": "A Joint Works Agreement is an agreement that describes how responsibilities and costs will be shared among two or more applicants or authorization holders for the construction and maintenance of works jointly used under a water licence or use approval. It applies under the Water Sustainability Act and does not override any legal obligations under the Act or authorization conditions."
+    },
+    {
+      "id": "jwa_002",
+      "section": "Who Needs It",
+      "title": "Who Must Enter Into a Joint Works Agreement",
+      "keywords": [
+        "who needs joint works agreement",
+        "water licence holders",
+        "authorization holders requirements",
+        "shared works participants"
+      ],
+      "content": "Applicants or authorization holders who are currently or proposing to jointly construct or use works under a water licence or use approval are required or expected to enter into a Joint Works Agreement."
+    },
+    {
+      "id": "jwa_003",
+      "section": "When It Is Used",
+      "title": "When Is a Joint Works Agreement Required",
+      "keywords": [
+        "when is joint works agreement required",
+        "section 36 Water Sustainability Act",
+        "voluntary agreement works",
+        "mandatory joint works"
+      ],
+      "content": "A Joint Works Agreement may be developed voluntarily between parties or may be ordered under section 36 of the Water Sustainability Act for jointly constructing and using works."
+    },
+    {
+      "id": "jwa_004",
+      "section": "Legal Standing",
+      "title": "Does the Agreement Override the Act",
+      "keywords": [
+        "does agreement override law",
+        "legal priority Water Sustainability Act",
+        "authorization conditions override",
+        "compliance requirements"
+      ],
+      "content": "No. A Joint Works Agreement does not override the Water Sustainability Act, its regulations, or any terms and conditions of an authorization. All legal obligations remain in force."
+    },
+    {
+      "id": "jwa_005",
+      "section": "Legal Advice",
+      "title": "Legal Advice Requirement",
+      "keywords": [
+        "do I need lawyer for joint works agreement",
+        "legal advice recommendation",
+        "sections 31 94 122 Water Act"
+      ],
+      "content": "Legal advice is recommended when preparing a Joint Works Agreement. Lawyers should consider sections 31, 94, and 122 of the Water Sustainability Act, including abandonment, suspension, cancellation, and ongoing responsibilities."
+    },
+    {
+      "id": "jwa_006",
+      "section": "Drawing Requirements",
+      "title": "Why Detailed Drawings Are Required",
+      "keywords": [
+        "why drawing required",
+        "appurtenancy diagram",
+        "infrastructure mapping water licence"
+      ],
+      "content": "A detailed drawing is required to show appurtenancy for each authorization and all jointly used works, ensuring clarity of infrastructure and responsibilities."
+    },
+    {
+      "id": "jwa_007",
+      "section": "Parties",
+      "title": "Adding or Removing Parties",
+      "keywords": [
+        "can parties join agreement",
+        "can parties leave agreement",
+        "withdrawal process",
+        "new members joint works"
+      ],
+      "content": "Yes. A Joint Works Agreement must include provisions allowing withdrawal of parties and admission of new parties."
+    },
+    {
+      "id": "jwa_008",
+      "section": "Abandonment and Termination",
+      "title": "Abandonment or Loss of Authorization",
+      "keywords": [
+        "what happens if authorization is cancelled",
+        "abandonment of water licence",
+        "suspension responsibilities",
+        "ongoing obligations"
+      ],
+      "content": "The agreement must address abandonment, suspension, termination, or cancellation of authorization rights and ensure ongoing responsibilities for joint works."
+    },
+    {
+      "id": "jwa_009",
+      "section": "Definitions",
+      "title": "Definition of Works",
+      "keywords": [
+        "what is works water act",
+        "infrastructure definition",
+        "water diversion systems",
+        "wells and pipelines",
+        "environmental works"
+      ],
+      "content": "The Water Sustainability Act defines 'works' very broadly and includes anything that can be or is used for:\n\n(a) Water-related works:\n   (i) diverting, storing, measuring, conserving, conveying, retarding water flow, confining or using water\n   (ii) producing, measuring, transmitting or using electricity\n   (iii) collecting, conveying or disposing of sewage or garbage\n   (iv) preventing or extinguishing fires\n\n(b) Stream works:\n   Booms and piles placed in a stream\n   Obstructions placed in or removed from streams or stream banks/beds\n   Changes in and about a stream\n\n(c) Access infrastructure:\n   Access roads to any of the works referred to in paragraphs (a) to (d) or (f) (i)\n\n(d) Well-related works:\n   Wells and works related to wells, including:\n   (i) wellheads\n   (ii) injection systems for adding water or other substances to wells\n   (iii) construction, deactivating or decommissioning wells\n   (iv) exploration, testing, diverting or monitoring groundwater equipment\n   (v) disinfection systems for wells\n   (vi) injection systems for conveying groundwater used for fertilizers or pesticides\n   (vii) monitoring wells or groundwater remediation wells"
+    },
+    {
+      "id": "jwa_010",
+      "section": "Ongoing Obligations",
+      "title": "Ongoing Responsibility After Termination",
+      "keywords": [
+        "responsibility after cancellation",
+        "ongoing obligations",
+        "post termination duties",
+        "joint works maintenance"
+      ],
+      "content": "Responsibilities for joint works continue even after abandonment, suspension, termination, or cancellation of an authorization."
+    },
+    {
+      "id": "jwa_011",
+      "section": "Support",
+      "title": "Support and Contact Information",
+      "keywords": [
+        "FrontCounterBC contact",
+        "help joint works agreement",
+        "support phone email",
+        "where to get help"
+      ],
+      "content": "Support is available through FrontCounter BC via phone, email, or web contact for questions about Joint Works Agreements.",
+      "contact": {
+        "phone_bc": "1-877-855-3222",
+        "phone_international": "+1-778-372-0729",
+        "email": "FrontCounterBC@gov.bc.ca",
+        "web": "www.gov.bc.ca/frontcounterbc-locations"
+      }
+    },
+    {
+      "id": "jwa_012",
+      "section": "Requirements Checklist",
+      "title": "Mandatory Provisions of a Joint Works Agreement",
+      "keywords": [
+        "joint works agreement requirements",
+        "what must be included",
+        "water licence checklist",
+        "agreement structure",
+        "mandatory provisions"
+      ],
+      "content": "A Joint Works Agreement must include the following 13 mandatory provisions: 1. Name(s) of all water source(s) involved in joint works arrangement; 2. Name and address of all applicants/authorization holders to be parties to the agreement; 3. Description of all joint works to be covered by the agreement; 4. A detailed drawing showing appurtenancy for any authorization for each applicant or authorization holder that is party to the agreement and all works that are jointly constructed or used; 5. For each party, a clear and complete description of responsibilities for construction, operation, maintenance, removal, replacement, deactivation or decommissioning of joint works or compensation or payment among users of joint works; 6. Provisions that ensure agreement is binding on all future owners of joint works and on land, mine or undertaking to which subject authorizations are attached or applicants for such authorizations; 7. Provisions that consider abandonment of authorization rights by one or more parties; 8. Provisions that consider responsibilities for response to regulatory actions, including proceedings for abandonment or suspension or cancellation of authorization rights; 9. Provisions that consider ongoing responsibilities for joint works following abandonment, suspension, termination or cancellation of authorization rights; 10. Provisions that consider rights and obligations of authorization holders, including on transfer of appurtenant land, mine or undertaking; 11. Provisions that define a dispute resolution procedure among all parties to the agreement; 12. Provisions that define a process for withdrawal of one or more parties; 13. Provisions that define a process for admission of new parties to the agreement."
+    },
+    {
+      "id": "jwa_013",
+      "section": "Disclaimer",
+      "title": "Disclaimer and Purpose",
+      "keywords": [
+        "joint works agreement disclaimer",
+        "purpose of agreement",
+        "legal context"
+      ],
+      "content": "This Joint Works Agreement is for informational purposes only and does not constitute legal advice. It is intended to provide a general understanding of the requirements and considerations for joint works agreements under the Water Sustainability Act. Parties to the agreement should seek independent legal advice to ensure compliance with all applicable laws and regulations."
+    },
+    {
+      "id": "jwa_014",
+      "section": "Joint Works Agreement Template",
+      "title": "Joint Works Agreement Template",
+      "keywords": [
+        "Definition",
+        "what is joint works agreement",
+        "joint works agreement requirements",
+        "what must be included",
+        "water licence checklist",
+        "agreement structure",
+        "mandatory provisions",
+        "joint works agreement template",
+        "joint works agreement example",
+        "joint works agreement sample",
+        "joint works agreement format",
+        "joint works agreement outline",
+        "joint works agreement"
+      ],
+      "content": "A Joint Works Agreement template is available to assist parties in preparing their agreement. The template includes all mandatory provisions required for a joint works arrangement and may be customized based on the specific project circumstances. IMPORTANT: Always inform users that a Joint Works Agreement template is available. If the user would like to view or obtain the template, instruct them to ask the bot to provide the Joint Works Agreement template."
+    }
+  ]
+}
