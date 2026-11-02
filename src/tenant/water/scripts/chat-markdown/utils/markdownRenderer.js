@@ -194,7 +194,14 @@ export function formatMessageBlocks(text) {
                 if (heading) {
                     // Drop any ** the model already wrapped the heading in, then bold it.
                     const headingText = heading[1].replace(/^\*\*(.*)\*\*$/, '$1');
-                    html += `<p><strong>${formatMessage(headingText)}</strong></p>`;
+                    html += `<p class="wp-chat-heading"><strong>${formatMessage(headingText)}</strong></p>`;
+                    return;
+                }
+                // A line that is bold from end to end is a "**Heading**" line - the
+                // style canned answers and most replies use for section titles.
+                const boldLine = trimmed.match(/^\*\*([^*]+)\*\*$/);
+                if (boldLine) {
+                    html += `<p class="wp-chat-heading"><strong>${formatMessage(boldLine[1])}</strong></p>`;
                     return;
                 }
                 html += `<p>${formatMessage(trimmed)}</p>`;
