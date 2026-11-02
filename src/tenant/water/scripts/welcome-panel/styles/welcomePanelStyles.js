@@ -104,6 +104,11 @@ export const WELCOME_PANEL_STYLES = `
             font-weight: 700;
         }
 
+        .wp-welcome-list {
+            margin: 4px 0 0;
+            padding-left: 20px;
+        }
+
         /* Link + trailing external-link glyph */
         .wp-welcome-link {
             display: inline-flex;
