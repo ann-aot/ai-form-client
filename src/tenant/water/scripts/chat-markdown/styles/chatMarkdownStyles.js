@@ -72,6 +72,11 @@ export const CHAT_MARKDOWN_STYLES = `
             margin: 0;
         }
 
+        /* Section title - spaced from its body like .wp-welcome-heading. */
+        .wp-chat-block p.wp-chat-heading {
+            margin-bottom: 8px;
+        }
+
         /* The <ul> draws the bullet glyphs; no bullet characters live in the text.
            The host form loads ExtJS, whose stylesheet carries a bare element-level
            reset setting list-style to none on every li. Inheriting the marker from
@@ -80,20 +85,26 @@ export const CHAT_MARKDOWN_STYLES = `
            selector. display: list-item guards against a host reset that would
            otherwise flatten items to blocks. */
         .wp-chat-bubble ul {
-            margin: 4px 0 0;
+            margin: 8px 0 0;
             padding-left: 20px;
             list-style: disc outside;
         }
 
+        /* The heading already supplies the 8px; don't double it. */
+        .wp-chat-block .wp-chat-heading + ul,
+        .wp-chat-block .wp-chat-heading + ol {
+            margin-top: 0;
+        }
+
         .wp-chat-bubble li {
-            margin: 4px 0;
+            margin: 0;
             display: list-item;
             list-style: disc outside;
         }
 
         /* Numbered replies - same reset, restated as decimal for both levels. */
         .wp-chat-bubble ol {
-            margin: 4px 0 0;
+            margin: 8px 0 0;
             padding-left: 22px;
             list-style: decimal outside;
         }
