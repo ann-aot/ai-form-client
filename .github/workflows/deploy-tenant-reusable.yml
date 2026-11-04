@@ -42,13 +42,13 @@ jobs:
             --exclude-pattern '*.html' \
             --delete-destination false
 
-      # - name: Upload Tenant Assets
-      #   run: |
-      #     az storage blob sync \
-      #       --auth-mode login \
-      #       --account-name "${{ secrets.STORAGE_ACCOUNT_NAME }}" \
-      #       --container 'assets' \
-      #       --source "src/tenant/${{ inputs.tenant }}/assets" \
-      #       --destination "tenants/${{ inputs.tenant }}" \
-      #       --delete-destination false
+      - name: Upload Tenant Assets
+        run: |
+          az storage blob sync \
+            --auth-mode login \
+            --account-name "${{ secrets.STORAGE_ACCOUNT_NAME }}" \
+            --container 'assets' \
+            --source "src/tenant/${{ inputs.tenant }}/assets" \
+            --destination "tenants/${{ inputs.tenant }}" \
+            --delete-destination false
 
