@@ -1,0 +1,43 @@
+{
+  "rag_system": "step7_relationships_other_than_agent",
+  "version": "2.0",
+  "type": "knowledge",
+  "description": "Trigger rules for authorization and representation relationships other than standard agency. When specific relationship types are detected, the AI must direct the user to contact FrontCounter BC for clarification.",
+  "knowledge_items": [
+    {
+      "id": "rel_001",
+      "section": "Authorization Requirements",
+      "title": "Contact FrontCounter BC for Non-Standard Relationships",
+      "type": "trigger_rule",
+      "priority": "high",
+      "keywords": [
+        "Consultant",
+        "Appointment Letter",
+        "Executor",
+        "Administrator",
+        "Trustee of Applicant's Estate",
+        "Copy of Will",
+        "Letter of Appointment",
+        "Family Member",
+        "Authorization Letter",
+        "Friend",
+        "Neighbour",
+        "Power of Attorney",
+        "Representative",
+        "Representation Agreement",
+        "Lawyer",
+        "Notary",
+        "Trustee in Bankruptcy",
+        "Board Member",
+        "Employee",
+        "Owner"
+      ],
+      "instruction": "If any of the keywords are detected in a user query related to authorization, roles, or representation, the assistant must direct the user to contact FrontCounter BC for clarification. This rule overrides standard FAQ responses.",
+      "content": "For clarification on authorization requirements, please contact FrontCounter BC.",
+      "contact": {
+        "name": "FrontCounter BC",
+        "url": "http://www.frontcounterbc.gov.bc.ca/"
+      }
+    }
+  ]
+}

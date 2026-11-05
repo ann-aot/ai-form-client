@@ -1,0 +1,62 @@
+{
+  "rag_system": "step7_co_applicants",
+  "version": "2.0",
+  "type": "knowledge",
+  "description": "Defines what a co-applicant is, when to add one, and what consent is required in a Water Licence Application.",
+  "knowledge_items": [
+    {
+      "id": "coapplicant_001",
+      "section": "Definition",
+      "title": "What Is a Co-Applicant",
+      "keywords": [
+        "co-applicant definition",
+        "who is a co-applicant",
+        "additional party on title"
+      ],
+      "content": "A co-applicant is an individual or company/organization listed on the title of the land, mine, or undertaking who was not previously identified as the principal applicant."
+    },
+    {
+      "id": "coapplicant_002",
+      "section": "When to Add",
+      "title": "When Should You Add a Co-Applicant",
+      "keywords": [
+        "when to add co-applicant",
+        "shared land ownership",
+        "shared water rights",
+        "shared water works responsibility"
+      ],
+      "content": "Add a co-applicant if someone else also has legal rights or responsibility for the land, water use, or works in this application.",
+      "examples": [
+        "More than one person owns the land.",
+        "Another person or organization has rights to use the water.",
+        "Another person or organization is responsible for the water works."
+      ]
+    },
+    {
+      "id": "coapplicant_003",
+      "section": "Consent Requirement",
+      "title": "Written Consent Is Required",
+      "keywords": [
+        "co-applicant consent",
+        "written authorization",
+        "signed consent co-applicant"
+      ],
+      "content": "If you add a co-applicant, each person must provide written consent. The co-applicant must follow the consent form template and upload a signed copy. No system-generated form is provided.",
+      "reference": {
+        "rag_system": "co_applicant_consent_form_template",
+        "note": "See the co-applicant authorization letter template for the required format."
+      }
+    },
+    {
+      "id": "coapplicant_004",
+      "section": "Optional",
+      "title": "Co-Applicant Is Not Always Required",
+      "keywords": [
+        "do I need a co-applicant",
+        "single applicant",
+        "no co-applicant needed"
+      ],
+      "content": "If it is only you, you can continue without adding a co-applicant."
+    }
+  ]
+}
