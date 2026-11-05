@@ -1,0 +1,142 @@
+name: Deploy RAG Documents
+
+# Manual only. Pick the branch with "Use workflow from" (dev, test or main),
+# then pick the tenant. The branch decides the target environment.
+#
+# Uploads add or overwrite blobs only. Removing a file from Git does NOT
+# delete it from the container. To retire a document:
+#   1. Remove it from src/tenant/<tenant>/rag/ in Git
+#   2. Set blob metadata IsDeleted=true on the blob in the container
+#   3. Run the indexer so the document is removed from the search index
+#   4. Hard delete the blob from the container if needed
+# Remove from Git first so a deploy can't re-upload the file and clear IsDeleted.
+#
+# TODO: add an option to run the tenant's Azure AI Search indexer after upload
+# (blocked until the Water/FOI indexer failures are resolved).
+
+on:
+  workflow_dispatch:
+    inputs:
+      tenant:
+        description: Tenant (matches src/tenant/<tenant> folder name)
+        required: true
+        type: choice
+        options:
+          - water
+          - fish
+          - foi-demo
+          - chefs1
+      dry_run:
+        description: Dry run — preview the files that would be uploaded; nothing is uploaded (see the run summary)
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  deploy-rag-docs:
+    # Forks have no Azure secrets/environments; only deploy from the upstream repo
+    if: github.repository == 'bcgov/ai-form-client'
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name }}
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Validate branch
+        if: ${{ !contains(fromJSON('["dev", "test", "main"]'), github.ref_name) }}
+        run: |
+          echo "::error::RAG documents can only be deployed from dev, test or main (got '${{ github.ref_name }}')."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve container
+        id: target
+        env:
+          RAG_CONTAINER_WATER: ${{ secrets.RAG_CONTAINER_WATER }}
+          RAG_CONTAINER_FISH: ${{ secrets.RAG_CONTAINER_FISH }}
+          RAG_CONTAINER_FOI_DEMO: ${{ secrets.RAG_CONTAINER_FOI_DEMO }}
+          RAG_CONTAINER_CHEFS1: ${{ secrets.RAG_CONTAINER_CHEFS1 }}
+        run: |
+          source="src/tenant/${{ inputs.tenant }}/rag"
+          if [ ! -d "$source" ] || [ -z "$(ls -A "$source")" ]; then
+            echo "::error::No RAG documents found in $source."
+            exit 1
+          fi
+
+          case "${{ inputs.tenant }}" in
+            water)    container="$RAG_CONTAINER_WATER" ;;
+            fish)     container="$RAG_CONTAINER_FISH" ;;
+            foi-demo) container="$RAG_CONTAINER_FOI_DEMO" ;;
+            chefs1)   container="$RAG_CONTAINER_CHEFS1" ;;
+          esac
+          if [ -z "$container" ]; then
+            echo "::error::RAG container secret is not set for tenant '${{ inputs.tenant }}' in environment '${{ github.ref_name }}'."
+            exit 1
+          fi
+
+          echo "source=$source" >> "$GITHUB_OUTPUT"
+          echo "container=$container" >> "$GITHUB_OUTPUT"
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # Fails fast if the identity lacks a data role or the storage firewall blocks the runner
+      - name: Check storage access
+        run: |
+          az storage blob list \
+            --auth-mode login \
+            --account-name "${{ secrets.RAG_STORAGE_ACCOUNT_NAME }}" \
+            --container-name "${{ steps.target.outputs.container }}" \
+            --num-results 1 \
+            --output none
+
+      - name: Upload RAG Documents
+        run: |
+          az storage blob upload-batch \
+            --auth-mode login \
+            --account-name "${{ secrets.RAG_STORAGE_ACCOUNT_NAME }}" \
+            --destination "${{ steps.target.outputs.container }}" \
+            --source "${{ steps.target.outputs.source }}" \
+            --overwrite true \
+            ${{ inputs.dry_run && '--dryrun' || '' }}
+
+      - name: Summary
+        if: always()
+        run: |
+          source="src/tenant/${{ inputs.tenant }}/rag"
+          {
+            if [ "${{ inputs.dry_run }}" = "true" ]; then
+              echo "### 🔍 DRY RUN — nothing was uploaded"
+              echo
+              echo "Re-run with **Dry run** unticked to upload these files."
+            else
+              echo "### RAG documents uploaded"
+            fi
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Tenant | \`${{ inputs.tenant }}\` |"
+            echo "| Branch | \`${{ github.ref_name }}\` |"
+            echo "| Environment | \`${{ github.ref_name == 'main' && 'prod' || github.ref_name }}\` |"
+            echo "| Source | \`$source\` |"
+            echo "| Files | $(ls -1 "$source" 2>/dev/null | wc -l) |"
+            echo
+            echo "<details><summary>Files $([ "${{ inputs.dry_run }}" = "true" ] && echo "that would be uploaded" || echo "uploaded") (overwrite if they exist)</summary>"
+            echo
+            echo "| File | Size |"
+            echo "|---|---|"
+            ls -1 "$source" 2>/dev/null | while read -r f; do
+              echo "| $f | $(du -h "$source/$f" | cut -f1) |"
+            done
+            echo
+            echo "</details>"
+            echo
+            echo "> Files removed from Git are **not** deleted from the container. To retire a document: remove it from Git first, set blob metadata \`IsDeleted=true\`, run the indexer, then hard delete the blob if needed."
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -8,6 +8,7 @@ on:
       # - main
     paths:
       - 'src/tenant/chefs1/**'
+      - '!src/tenant/chefs1/rag/**'
       - '.github/workflows/deploy-tenant-reusable.yml'
       - '.github/workflows/deploy-chefs1.yml'
 
