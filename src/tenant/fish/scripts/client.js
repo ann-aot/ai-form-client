@@ -85,11 +85,6 @@ else {
     (function () {
 
 const clientId = '22222222-2222-4222-8222-222222222222';
-// TEST: const API_BACKEND_BASE_URL = 'https://nraif-671b-test-api.ambitiousmeadow-949bd8c6.canadacentral.azurecontainerapps.io';
-// DEV : const API_BACKEND_BASE_URL = 'https://nraif-671b-dev-api.icymushroom-bc5ec66d.canadacentral.azurecontainerapps.io';
-// const API_BACKEND_BASE_URL = 'http://localhost:8003';
-// dev
-// const API_BACKEND_BASE_URL = 'https://nraif-671b-dev-commonservi-api.livelymushroom-b9ecaae0.canadacentral.azurecontainerapps.io';
 // test
 const API_BACKEND_BASE_URL = 'https://nraif-671b-test-api.redground-c9aa9e63.canadacentral.azurecontainerapps.io'
 
