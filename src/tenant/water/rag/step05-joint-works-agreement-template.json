@@ -1,0 +1,157 @@
+{
+  "rag_system": "step5_joint_works_agreement_template",
+  "version": "2.0",
+  "type": "template",
+  "description": "Template and field guide for a Joint Works Agreement. Used when multiple water licence holders jointly construct and manage shared water infrastructure. Defines all required sections, fields, and their expected values.",
+  "global_summary": "A Joint Works Agreement is a structured legal contract between multiple water licence holders or land occupants who jointly construct and manage shared water infrastructure. It defines the parties involved, their water rights, cost-sharing percentages, operational responsibilities, governance through a manager, usage restrictions, land access rights, dispute resolution mechanisms, and legal continuity. It ensures coordinated development and maintenance of shared water systems while preventing misuse and defining enforceable obligations for all parties.",
+  "sections": [
+    {
+      "section_id": "sec_01",
+      "section_name": "Agreement Header",
+      "description": "The opening date and execution details of the agreement.",
+      "fields": [
+        { "field": "agreement_date",   "type": "string",  "required": true,  "note": "Format: Day, Month, Year" },
+        { "field": "execution_day",    "type": "string",  "required": true,  "note": "Day of signing" },
+        { "field": "execution_month",  "type": "string",  "required": true,  "note": "Month of signing" },
+        { "field": "execution_year",   "type": "string",  "required": true,  "note": "Year of signing" }
+      ],
+      "template_text": "Agreement made this ___ day of __________, 20____."
+    },
+    {
+      "section_id": "sec_02",
+      "section_name": "Parties",
+      "description": "All parties entering into the agreement. Minimum 2 parties required.",
+      "fields": [
+        { "field": "number_of_parties",  "type": "integer", "required": true,  "note": "Minimum 2" },
+        { "field": "full_legal_name",    "type": "string",  "required": true,  "note": "Full legal name of each party" },
+        { "field": "full_mailing_address","type": "string", "required": true,  "note": "Full mailing address of each party" }
+      ]
+    },
+    {
+      "section_id": "sec_03",
+      "section_name": "Water Rights (WHEREAS Clauses)",
+      "description": "Background clauses defining land ownership, water licence numbers, authorized volumes, and water sources for each party.",
+      "fields": [
+        { "field": "lawful_occupant_description",    "type": "string", "required": true,  "note": "Description of lawful occupancy for each party" },
+        { "field": "property_description",           "type": "string", "required": true,  "note": "Land or lot details" },
+        { "field": "conditional_water_licence_number","type": "string","required": true,  "note": "Licence number for each party" },
+        { "field": "authorized_water_volume",        "type": "string", "required": true,  "note": "Volume authorized under the licence" },
+        { "field": "water_source",                   "type": "string", "required": true,  "note": "Name of river, creek, or lake" }
+      ]
+    },
+    {
+      "section_id": "sec_04",
+      "section_name": "Purpose and Intent",
+      "description": "Describes the purpose of the joint works and the parties' intent to construct and operate them.",
+      "fields": [
+        { "field": "joint_works_description", "type": "string", "required": true, "note": "Description of the shared system's purpose" },
+        { "field": "intent_statement",        "type": "string", "required": true, "note": "Statement of construction and operation intent" }
+      ]
+    },
+    {
+      "section_id": "sec_05",
+      "section_name": "Infrastructure Details",
+      "description": "Physical description of the shared water system including intake, route, and destination.",
+      "fields": [
+        { "field": "works_type",              "type": "string", "required": true,  "note": "e.g., ditch, pipe, flume, diversion box" },
+        { "field": "intake_location",         "type": "string", "required": true,  "note": "Description of the source point" },
+        { "field": "system_route_description","type": "string", "required": true,  "note": "Path of the water system" },
+        { "field": "destination_lots",        "type": "string", "required": true,  "note": "Lot numbers or land parcels served" },
+        { "field": "map_reference",           "type": "string", "required": false, "note": "Sketch or map name if applicable" }
+      ]
+    },
+    {
+      "section_id": "sec_06",
+      "section_name": "Cost Sharing",
+      "description": "Defines how construction and ongoing maintenance costs are split between parties.",
+      "fields": [
+        { "field": "party_construction_percentage", "type": "number",        "required": true, "note": "0–100 per party, must total 100%" },
+        { "field": "party_maintenance_percentage",  "type": "number",        "required": true, "note": "0–100 per party, must total 100%" },
+        { "field": "cost_categories",               "type": "array<string>", "required": true, "note": "e.g., construction, maintenance, repair, renewal, operation" }
+      ]
+    },
+    {
+      "section_id": "sec_07",
+      "section_name": "Water Usage Restrictions",
+      "description": "Limits water use to licensed volumes and approved land only.",
+      "fields": [
+        { "field": "max_allowed_usage_per_party", "type": "string",  "required": true, "note": "Licensed limit per party" },
+        { "field": "prohibited_use_lands",        "type": "string",  "required": true, "note": "Description of non-authorized land restrictions" },
+        { "field": "compliance_rule",             "type": "boolean", "required": true, "note": "Must be true — parties must comply with licence terms" }
+      ]
+    },
+    {
+      "section_id": "sec_08",
+      "section_name": "Manager",
+      "description": "Defines the appointed manager's authority, financial responsibilities, and replacement process.",
+      "fields": [
+        { "field": "manager_name",              "type": "string",        "required": true,  "note": "Full name of appointed manager" },
+        { "field": "manager_powers",            "type": "array<string>", "required": true,  "note": "e.g., construction control, maintenance authority, financial collection, water shutoff authority, system operation control" },
+        { "field": "financial_management_rules","type": "string",        "required": true,  "note": "Advance levy or reimbursement model" },
+        { "field": "reporting_requirement",     "type": "string",        "required": true,  "note": "Annual statement requirement" },
+        { "field": "appointment_term_end_date", "type": "date",          "required": true,  "note": "End date of manager's term" },
+        { "field": "replacement_process",       "type": "string",        "required": true,  "note": "Majority vote procedure for replacing manager" }
+      ]
+    },
+    {
+      "section_id": "sec_09",
+      "section_name": "Access Rights",
+      "description": "Grants authorized personnel access to land for construction, maintenance, and operation.",
+      "fields": [
+        { "field": "land_access_permission",    "type": "boolean",       "required": true, "note": "Must be true" },
+        { "field": "authorized_personnel_access","type": "boolean",      "required": true, "note": "Must be true" },
+        { "field": "permitted_activities",      "type": "array<string>", "required": true, "note": "e.g., construction, maintenance, repair, operation, inspection" }
+      ]
+    },
+    {
+      "section_id": "sec_10",
+      "section_name": "Property Transfer",
+      "description": "Obligations when land is sold — new owners must assume the agreement.",
+      "fields": [
+        { "field": "sale_notification_required",    "type": "boolean", "required": true, "note": "Seller must notify buyer of agreement" },
+        { "field": "buyer_assumption_clause_required","type": "boolean","required": true, "note": "Buyer must assume obligations" },
+        { "field": "continuity_obligation",         "type": "boolean", "required": true, "note": "Agreement continues with land ownership" }
+      ]
+    },
+    {
+      "section_id": "sec_11",
+      "section_name": "Dispute Resolution",
+      "description": "Defines how disputes between parties are resolved.",
+      "fields": [
+        { "field": "authority_body",    "type": "string",  "required": true, "note": "e.g., Engineer under Water Act" },
+        { "field": "jurisdiction",      "type": "string",  "required": true, "note": "Water District" },
+        { "field": "decision_finality", "type": "boolean", "required": true, "note": "Must be true — decision is final" }
+      ]
+    },
+    {
+      "section_id": "sec_12",
+      "section_name": "Legal Binding",
+      "description": "Confirms the agreement is legally binding on all parties and their successors.",
+      "fields": [
+        { "field": "heirs_and_assigns_bound", "type": "boolean", "required": true, "note": "Agreement binds heirs, executors, administrators, and assigns" },
+        { "field": "legal_continuity",        "type": "boolean", "required": true, "note": "Agreement continues in force" }
+      ]
+    },
+    {
+      "section_id": "sec_13",
+      "section_name": "Term of Agreement",
+      "description": "Specifies the duration of the agreement.",
+      "fields": [
+        { "field": "start_date",    "type": "string", "required": true,  "note": "Start date of the agreement" },
+        { "field": "end_date",      "type": "string", "required": true,  "note": "End date of the agreement" },
+        { "field": "duration_type", "type": "string", "required": false, "note": "e.g., fixed term" }
+      ]
+    },
+    {
+      "section_id": "sec_14",
+      "section_name": "Signatures",
+      "description": "Execution clause — all parties must sign and be witnessed.",
+      "fields": [
+        { "field": "number_of_witnesses",       "type": "integer", "required": true, "note": "At least one witness per party" },
+        { "field": "party_signature_required",  "type": "boolean", "required": true, "note": "Must be true" },
+        { "field": "witness_signature_required","type": "boolean", "required": true, "note": "Must be true" },
+        { "field": "execution_clause",          "type": "string",  "required": true, "note": "SIGNED, SEALED AND DELIVERED" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "rag_system": "step9_declaration_water_sustainability_act",
+  "version": "2.0",
+  "type": "knowledge",
+  "description": "Knowledge base for the Step-Declaration of the Water Licence Application. Covers Section 6 of the Water Sustainability Act — rules and restrictions for diverting, using, and storing water from streams and aquifers in British Columbia.",
+  "source_document": {
+    "title": "Water Sustainability Act - Section 6: Use of Water",
+    "type": "legislation",
+    "url": "https://www.bclaws.gov.bc.ca/civix/document/id/complete/statreg/14015#section6"
+  },
+  "knowledge_items": [
+    {
+      "id": "wsa_001",
+      "section": "General Prohibition",
+      "title": "Authorization Required to Divert or Use Water",
+      "keywords": [
+        "divert water without licence",
+        "use water without authorization",
+        "general prohibition water use"
+      ],
+      "content": "A person must not divert water from a stream or aquifer unless authorized by a licence or regulation. A person must not use water diverted from a stream or aquifer unless authorized."
+    },
+    {
+      "id": "wsa_002",
+      "section": "Exceptions",
+      "title": "Permitted Exceptions to the General Prohibition",
+      "keywords": [
+        "exceptions to water licence",
+        "firefighting water use",
+        "testing water quality",
+        "domestic groundwater use",
+        "mineral prospecting water"
+      ],
+      "content": "Exceptions to the general prohibition include: (1) Water may be diverted or stored for firefighting purposes, and must be restored once the fire is extinguished if taken from a stream channel. (2) Water may be diverted for testing quality or quantity of water or for conducting flow tests. (3) Unrecorded water may be used for domestic purposes or mineral prospecting, subject to regulations. (4) Groundwater may be diverted and used for domestic purposes unless restricted by regulation or aquifer-specific rules."
+    },
+    {
+      "id": "wsa_003",
+      "section": "Regulatory Conditions",
+      "title": "Additional Regulatory Conditions May Apply",
+      "keywords": [
+        "sections 135 136 Water Sustainability Act",
+        "aquifer authorization required",
+        "additional regulations water use"
+      ],
+      "content": "Some diversions or uses are subject to additional regulations under sections 135 and 136 of the Act. Certain aquifers may require authorization for domestic groundwater use."
+    },
+    {
+      "id": "wsa_004",
+      "section": "Declaration Context",
+      "title": "How This Applies to the Application Declaration",
+      "keywords": [
+        "declaration legal compliance",
+        "application submission legal basis",
+        "unauthorized water use not permitted"
+      ],
+      "content": "This legal framework supports the applicant declaration that all information provided in the application is complete and accurate. Users must acknowledge legal compliance before submission. Unauthorized water use is not permitted through application submission alone."
+    }
+  ]
+}

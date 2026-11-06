@@ -1,0 +1,205 @@
+{
+  "rag_system": "step7_agent_and_letter_of_agency",
+  "version": "2.2",
+  "type": "knowledge",
+  "description": "Knowledge base strictly for agents and Letter of Agency in Water Licence Applications. This RAG applies when the user is asking about an agent, a Letter of Agency, Letter of Agency guidelines, Letter of Agency requirements, the Letter of Agency template, or the Letter of Agency download document. It does not cover any other relationship types such as consultants, lawyers, representatives, trustees, board members, employees, power of attorney, or any other non-agent relationships.",
+  "global_rule": {
+    "instruction": "Always include the template download link in every response related to the Letter of Agency, including guideline, requirement, template, example, sample, or download questions, regardless of what the user asked.",
+    "always_append": "agency_006",
+    "download_label": "Download the Letter of Agency template"
+  },
+  "template_download": {
+    "title": "Letter of Agency - Generic Template",
+    "description": "Official downloadable Word document template for the Letter of Agency. Users can download, fill in, and submit this template.",
+    "url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/natural-resource-use/land-water-use/crown-land/local-government/agency_let.pdf",
+    "format": "pdf"
+  },
+  "template_rag_reference": {
+    "rag_system": "step7_letter_of_agency_template",
+    "instruction": "When a user asks for Letter of Agency guidelines, requirements, a template, an example, a sample, or a download document, retrieve and use the step7_letter_of_agency_template RAG together with this knowledge RAG."
+  },
+  "retrieval_phrases": [
+    "what are the guidelines for letter of agency",
+    "what are the guideline for letter of agency",
+    "what are the guideline of letter of agency",
+    "letter of agency guidelines",
+    "letter of agency guideline",
+    "guidelines for letter of agency",
+    "guideline for letter of agency",
+    "letter of agency requirements",
+    "letter of agency requirement",
+    "letter of agency template",
+    "letter of agency sample",
+    "letter of agency example",
+    "letter of agency download",
+    "download letter of agency",
+    "download letter of agency template",
+    "agency letter guidelines",
+    "agency letter guideline",
+    "agency letter template"
+  ],
+  "scope_rule": {
+    "strict": true,
+    "applies_only_to": [
+      "agent",
+      "letter of agency",
+      "letter of agency guideline",
+      "letter of agency guidelines",
+      "letter of agency requirement",
+      "letter of agency requirements",
+      "letter of agency template",
+      "letter of agency download",
+      "agency letter",
+      "agency letter template"
+    ],
+    "does_not_apply_to": [
+      "consultant",
+      "lawyer",
+      "notary",
+      "representative",
+      "representation agreement",
+      "power of attorney",
+      "trustee",
+      "executor",
+      "administrator",
+      "board member",
+      "employee",
+      "owner",
+      "family member",
+      "friend",
+      "neighbour",
+      "trustee in bankruptcy",
+      "appointment letter",
+      "copy of will",
+      "authorization letter"
+    ],
+    "out_of_scope_instruction": "If the user is asking about any relationship type other than 'agent' or 'letter of agency', do NOT use this RAG. Direct the user to contact FrontCounter BC at http://www.frontcounterbc.gov.bc.ca/ for clarification on other relationship types."
+  },
+  "knowledge_items": [
+    {
+      "id": "agency_001",
+      "section": "Overview",
+      "title": "What Is a Letter of Agency",
+      "type": "guidance",
+      "keywords": [
+        "letter of agency",
+        "agency letter",
+        "what is a letter of agency",
+        "agent application",
+        "letter of agency guideline",
+        "letter of agency guidelines",
+        "guideline for letter of agency",
+        "guidelines for letter of agency",
+        "what are the guidelines for letter of agency"
+      ],
+      "content": "Many people seeking natural resource ministry authorizations appoint an agent to submit applications on their behalf. The authorization itself is issued to the individual applicant, but an agent may complete and submit the application.",
+      "additional_guidance": ["Always append agency_006"]
+    },
+    {
+      "id": "agency_002",
+      "section": "Requirement",
+      "title": "When Is a Letter of Agency Required",
+      "type": "requirement",
+      "keywords": [
+        "when is letter of agency required",
+        "letter of agency requirement",
+        "agent submitting application",
+        "agent on behalf of applicant"
+      ],
+      "content": "Applications submitted by an agent on behalf of the individual who will receive the authorization must include a Letter of Agency.",
+      "additional_guidance": ["Always append agency_006"]
+    },
+    {
+      "id": "agency_003",
+      "section": "Purpose",
+      "title": "Purpose of the Letter of Agency",
+      "type": "explanation",
+      "keywords": [
+        "why is letter of agency needed",
+        "letter of agency purpose",
+        "authorize agent",
+        "agent authorization"
+      ],
+      "content": "The Letter of Agency is signed by the individual applicant to formally authorize an agent to act and submit the application on their behalf.",
+      "additional_guidance": ["Always append agency_006"]
+    },
+    {
+      "id": "agency_004",
+      "section": "Key Principle",
+      "title": "Applicant Remains Responsible",
+      "type": "rule",
+      "keywords": [
+        "applicant remains responsible",
+        "agent does not hold authorization",
+        "authorization issued to applicant not agent"
+      ],
+      "content": "Even when an agent submits the application, the authorization is issued to the individual applicant, who remains the responsible party. The agent acts on behalf of the applicant but does not hold the authorization.",
+      "additional_guidance": ["Always append agency_006"]
+    },
+    {
+      "id": "agency_005",
+      "section": "Definitions",
+      "title": "Definition of Agent",
+      "type": "definition",
+      "keywords": [
+        "what is an agent",
+        "agent definition",
+        "who is an agent"
+      ],
+      "content": "An agent is a person specifically appointed and authorized by the applicant to act on their behalf in submitting a Water Licence Application. This is distinct from other relationship types such as consultants, lawyers, or representatives, which are not covered by this RAG.",
+      "additional_guidance": ["Always append agency_006"]
+    },
+    {
+      "id": "agency_006",
+      "section": "Download Link",
+      "title": "Download Link",
+      "type": "download_link",
+      "keywords": [
+        "download letter of agency template",
+        "letter of agency template download",
+        "agency letter template",
+        "letter of agency download document",
+        "letter of agency",
+        "letter of agency form",
+        "letter of agency template",
+        "guidelines for letter of agency"
+      ],
+      "content": "Download the Letter of Agency template",
+      "references": [
+        {
+          "description": "Letter of Agency Template",
+          "url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/natural-resource-use/land-water-use/crown-land/local-government/agency_let.pdf"
+        }
+      ]
+    },
+    {
+      "id": "agency_007",
+      "section": "Guidelines",
+      "title": "Letter of Agency Guidelines",
+      "type": "guideline",
+      "keywords": [
+        "what are the guidelines for letter of agency",
+        "what are the guideline for letter of agency",
+        "what are the guideline of letter of agency",
+        "letter of agency guidelines",
+        "letter of agency guideline",
+        "guidelines for letter of agency",
+        "guideline for letter of agency",
+        "agency letter guidelines",
+        "agency letter guideline"
+      ],
+      "content": "A Letter of Agency must identify the appointed agent, identify the applicant granting authority, describe the purpose of the appointment, specify the term of authorization, and include the applicant's signature and date. Use the Letter of Agency template for the required format.",
+      "references": [
+        {
+          "description": "Related template RAG",
+          "rag_system": "step7_letter_of_agency_template"
+        },
+        {
+          "description": "Letter of Agency Template",
+          "url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/natural-resource-use/land-water-use/crown-land/local-government/agency_let.pdf"
+        }
+      ],
+      "additional_guidance": ["Always append agency_006", "Retrieve step7_letter_of_agency_template"]
+    }
+  ]
+}

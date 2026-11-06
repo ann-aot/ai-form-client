@@ -1,0 +1,84 @@
+{
+  "rag_system": "step10_complete",
+  "version": "2.0",
+  "type": "knowledge",
+  "description": "Knowledge base for Step-Complete Application Submission of the Water Licence Application. Covers additional information guidelines, payment methods, and final submission instructions.",
+  "knowledge_items": [
+    {
+      "id": "complete_001",
+      "section": "Additional Information",
+      "title": "What to Include in the Additional other Information Field",
+      "keywords": [
+        "additional information field",
+        "what to write in additional information",
+        "extra information water licence",
+        "existing water licence details"
+      ],
+      "content": "Applicants may provide any extra information relevant to supporting their water licence application. Only include information that is relevant to the application. Do NOT include personal information such as names, addresses, or contact details of individuals. Information should support or clarify the application context only. If the applicant has an existing water licence, they can share any relevant details in this section."
+    },
+    {
+      "id": "complete_002",
+      "section": "Payment Options",
+      "title": "Pay by Cheque or Money Order (Mail or Drop-Off)",
+      "keywords": [
+        "pay by cheque",
+        "money order payment",
+        "mail payment water licence",
+        "remittance form"
+      ],
+      "content": "You have decided to pay your fees via a cheque or money order. Please download and print the remittance form on the next page. You can drop off or mail in your cheque or money order along with your remittance form to any FrontCounter BC location. Be sure to make your cheque or money order payable to the 'Minister of Finance'.",
+       "references": [
+        {
+          "title": "FrontCounter BC Locations",
+          "url": "https://portal.nrs.gov.bc.ca/web/client/locations"
+        }
+      ]
+    },
+    {
+      "id": "complete_003",
+      "section": "Payment Options",
+      "title": "Pay In Person at a FrontCounter BC Office",
+      "keywords": [
+        "pay in person",
+        "FrontCounter BC office payment",
+        "in person payment water licence"
+      ],
+      "content": "You have decided to pay your fees in person at a FrontCounter BC location. Please download and print the remittance form on the next page. Bring your remittance form with you when making your payment. You may also mail in your cheque or money order along with the remittance form to any FrontCounter BC location. Be sure to make your cheque or money order payable to the 'Minister of Finance'.",
+      "references": [
+        {
+          "title": "FrontCounter BC Locations",
+          "url": "https://portal.nrs.gov.bc.ca/web/client/locations"
+        }
+      ]
+    },
+    {
+      "id": "complete_004",
+      "section": "Payment Options",
+      "title": "Pay by Credit Card Online",
+      "keywords": [
+        "pay by credit card",
+        "online payment water licence",
+        "Visa MasterCard American Express"
+      ],
+      "content": "You can use Visa, Visa Debit, MasterCard, Debit MasterCard, or American Express to make an online credit card payment."
+    },
+    {
+      "id": "complete_005",
+      "section": "Submission",
+      "title": "Final Submission Instructions",
+      "keywords": [
+        "final submission",
+        "select FrontCounter BC office",
+        "submission method",
+        "payment selection"
+      ],
+      "content": "Applicants must select a FrontCounter BC office for submission. Submission method and payment type determine required next steps such as remittance form generation and payment processing. Application submission is completed after payment selection and submission details are confirmed.",
+      "references": [
+        {
+          "title": "FrontCounter BC Payment Guidelines",
+          "url": "https://www2.gov.bc.ca/gov/content/industry/natural-resource-use/natural-resource-permits/fcbc-locations/fcbc-payment-guidelines"
+        }
+      ]
+    }
+  ]
+}
