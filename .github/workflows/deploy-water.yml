@@ -5,9 +5,10 @@ on:
     branches:
       - dev
       # - test
-      # - main
+      - main
     paths:
       - 'src/tenant/water/**'
+      - '!src/tenant/water/rag/**'
       - '.github/workflows/deploy-tenant-reusable.yml'
       - '.github/workflows/deploy-water.yml'
 

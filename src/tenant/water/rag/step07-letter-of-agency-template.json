@@ -1,0 +1,169 @@
+{
+  "rag_system": "step7_letter_of_agency_template",
+  "version": "2.2",
+  "type": "template",
+  "description": "Template and field guide strictly for the Letter of Agency. Applies when the user is asking about an agent, a Letter of Agency, Letter of Agency guidelines, Letter of Agency requirements, the Letter of Agency template, or the Letter of Agency download document. Does not apply to any other relationship types.",
+  "global_summary": "A Letter of Agency is a required authorization document used when an applicant appoints another person (agent) to act on their behalf in processing an application. Letter of Agency guidelines require the document to clearly identify both the agent and the applicant, define the purpose of the appointment, specify the term of authorization, and include the applicant's signature and date. Without a valid letter of agency on file, the application cannot be processed. Always include the downloadable Letter of Agency template link when answering Letter of Agency guideline, requirement, template, example, sample, or download questions.",
+  "global_rule": {
+    "instruction": "Always include the template download link in every response related to the Letter of Agency, including guideline, requirement, template, example, sample, or download questions, regardless of what the user asked.",
+    "always_append_section": "sec_08",
+    "download_label": "Download the Letter of Agency template"
+  },
+  "template_download": {
+    "title": "Letter of Agency - Generic Template",
+    "description": "Official downloadable Word document template for the Letter of Agency. Users can download, fill in, and submit this template.",
+    "url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/natural-resource-use/land-water-use/crown-land/local-government/agency_let.pdf",
+    "format": "pdf"
+  },
+  "retrieval_phrases": [
+    "what are the guidelines for letter of agency",
+    "what are the guideline for letter of agency",
+    "what are the guideline of letter of agency",
+    "letter of agency guidelines",
+    "letter of agency guideline",
+    "guidelines for letter of agency",
+    "guideline for letter of agency",
+    "letter of agency requirements",
+    "letter of agency requirement",
+    "letter of agency template",
+    "letter of agency sample",
+    "letter of agency example",
+    "letter of agency download",
+    "download letter of agency",
+    "download letter of agency template",
+    "agency letter guidelines",
+    "agency letter guideline",
+    "agency letter template"
+  ],
+  "scope_rule": {
+    "strict": true,
+    "applies_only_to": [
+      "agent",
+      "letter of agency",
+      "letter of agency guideline",
+      "letter of agency guidelines",
+      "letter of agency requirement",
+      "letter of agency requirements",
+      "letter of agency template",
+      "letter of agency download",
+      "agency letter",
+      "agency letter template"
+    ],
+    "does_not_apply_to": [
+      "consultant",
+      "lawyer",
+      "notary",
+      "representative",
+      "representation agreement",
+      "power of attorney",
+      "trustee",
+      "executor",
+      "administrator",
+      "board member",
+      "employee",
+      "owner",
+      "family member",
+      "friend",
+      "neighbour",
+      "trustee in bankruptcy",
+      "appointment letter",
+      "copy of will",
+      "authorization letter"
+    ],
+    "out_of_scope_instruction": "If the user is asking about any relationship type other than 'agent' or 'letter of agency', do NOT use this template. Direct the user to contact FrontCounter BC at http://www.frontcounterbc.gov.bc.ca/ for clarification on other relationship types."
+  },
+  "sections": [
+    {
+      "section_id": "sec_01",
+      "section_name": "Header Notice",
+      "description": "Opening instruction explaining when a Letter of Agency is required.",
+      "template_text": "If you have authorized another party to act for you in the processing of your application, you must submit to this office your signed letter appointing the agent."
+    },
+    {
+      "section_id": "sec_02",
+      "section_name": "Agent Information",
+      "description": "Full details of the person being appointed as agent.",
+      "fields": [
+        { "field": "agent_name",         "type": "string", "required": true, "note": "Full legal name of the agent" },
+        { "field": "agent_address",      "type": "string", "required": true, "note": "Full mailing address of the agent" },
+        { "field": "agent_email",        "type": "string", "required": true, "note": "Valid email address of the agent" },
+        { "field": "agent_phone_number", "type": "string", "required": true, "note": "Telephone number of the agent" }
+      ],
+      "template_text": "Name: [AGENT NAME]\nAddress: [AGENT ADDRESS]\nEmail: [AGENT EMAIL]\nTelephone: [AGENT PHONE]"
+    },
+    {
+      "section_id": "sec_03",
+      "section_name": "Purpose of Appointment",
+      "description": "Clearly states why the agent is being appointed, including application type, location, and purpose.",
+      "fields": [
+        { "field": "purpose_statement", "type": "string", "required": true, "note": "Required description of why agent is appointed" }
+      ],
+      "template_text": "To handle application for [APPLICATION TYPE] at [LOCATION], for the purposes of [PURPOSE DESCRIPTION]"
+    },
+    {
+      "section_id": "sec_04",
+      "section_name": "Term of Appointment",
+      "description": "Specifies how long the agent's authorization is valid. Choose one of the three options.",
+      "fields": [
+        {
+          "field": "term_type",
+          "type": "enum",
+          "required": true,
+          "options": [
+            "date_range",
+            "until_issuance",
+            "until_rejection"
+          ],
+          "note": "Select one option"
+        },
+        { "field": "start_date", "type": "string",  "required": false, "note": "Required only if term_type is date_range" },
+        { "field": "end_date",   "type": "string",  "required": false, "note": "Required only if term_type is date_range" }
+      ],
+      "template_text": "Options:\n(A) From [START DATE] to [END DATE]\n(B) Until issuance of document\n(C) Until rejection/refusal/disallowance of application"
+    },
+    {
+      "section_id": "sec_05",
+      "section_name": "Applicant Information",
+      "description": "Full details of the applicant who is granting the authorization.",
+      "fields": [
+        { "field": "applicant_name",         "type": "string", "required": true, "note": "Full legal name of the applicant" },
+        { "field": "applicant_address",      "type": "string", "required": true, "note": "Full mailing address of the applicant" },
+        { "field": "applicant_email",        "type": "string", "required": true, "note": "Valid email address of the applicant" },
+        { "field": "applicant_phone_number", "type": "string", "required": true, "note": "Telephone number of the applicant" }
+      ],
+      "template_text": "Name: [APPLICANT NAME]\nAddress: [APPLICANT ADDRESS]\nEmail: [APPLICANT EMAIL]\nTelephone: [APPLICANT PHONE]"
+    },
+    {
+      "section_id": "sec_06",
+      "section_name": "Signature and Authorization",
+      "description": "The applicant must sign and date the letter. Co-applicants may be exempt if they already signed through the main application form.",
+      "fields": [
+        { "field": "signature_required", "type": "boolean", "required": true, "note": "Must be true" },
+        { "field": "date_required",      "type": "boolean", "required": true, "note": "Must be true" }
+      ],
+      "co_applicant_rule": {
+        "note": "If all co-applicants have already signed through the co-applicant process of the application form, it is not necessary for all co-applicants to sign the Letter of Agency again.",
+        "applies_when": "co_applicants_already_signed_application_form",
+        "effect": "Only the primary applicant's signature is required on the Letter of Agency."
+      }
+    },
+    {
+      "section_id": "sec_07",
+      "section_name": "Processing Warning",
+      "description": "Critical notice — application cannot be processed without a valid Letter of Agency on file.",
+      "template_text": "***PLEASE NOTE***\nWE CANNOT PROCESS YOUR APPLICATION FROM AN AGENT IF THE AUTHORIZATION IS NOT ON FILE IN OUR OFFICE"
+    },
+    {
+      "section_id": "sec_08",
+      "section_name": "Download Link",
+      "description": "Download link for the Letter of Agency template.",
+      "template_text": "Download the Letter of Agency template: https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/natural-resource-use/land-water-use/crown-land/local-government/agency_let.pdf"
+    },
+    {
+      "section_id": "sec_09",
+      "section_name": "Guidelines Retrieval Note",
+      "description": "Ensures guideline-style user questions retrieve this template and include the download document link.",
+      "template_text": "For Letter of Agency guideline questions, explain that the document must identify the agent and applicant, describe the appointment purpose, specify the authorization term, and include the applicant's signature and date. Always include the Letter of Agency template download link."
+    }
+  ]
+}
