@@ -18,27 +18,12 @@ In addition to the scripts, each tenant provides a set of assets that the AI bac
 
 Assets live in `src/tenant/<tenant>/assets/` and are uploaded separately from `scripts/` to the `assets` Azure Storage container (only reachable by Azure backend services).
 
-## Tenant RAG documents
-
-`src/tenant/<tenant>/rag/` holds the documents indexed by Azure AI Search for that tenant's RAG. Git is the source of truth; the documents are uploaded to the tenant's RAG storage container by the manual **Deploy RAG Documents** workflow, not by the automatic tenant deploy.
-
-Removing a file from Git does **not** delete it from the container. To retire a document:
-
-1. Remove it from `src/tenant/<tenant>/rag/`
-2. Set blob metadata `IsDeleted=true` on the blob in the container
-3. Run the indexer so the document is removed from the search index
-4. Hard delete the blob from the container if needed
-
-Remove it from Git first: re-deploying a file that is still in Git overwrites the blob and clears `IsDeleted`, which puts the document back in the index.
-
 ## CI/CD
 
 Two workflow files exist per tenant — a trigger wrapper and a shared reusable workflow:
 
-- `.github/workflows/deploy-<tenant>.yml` — triggers on pushes to `dev`, `test`, or `main` that touch that tenant's files (i.e. PR merges); the deploy job only runs in `bcgov/ai-form-client`, not in forks
+- `.github/workflows/deploy-<tenant>.yml` — triggers on pushes to `dev`, `test`, or `main` that touch that tenant's files
 - `.github/workflows/deploy-tenant-reusable.yml` — uploads that tenant's `scripts/` folder and assets to Azure Storage
-
-Changes under `src/tenant/<tenant>/rag/` do not trigger these workflows. RAG documents are deployed manually with `.github/workflows/deploy-rag-docs.yml`: in GitHub Actions, choose **Deploy RAG Documents** → **Run workflow**, select the branch (`dev`, `test` or `main`) under "Use workflow from", select the tenant, and optionally tick **Dry run** to list what would be uploaded without uploading.
 
 Branch-to-environment mapping:
 
@@ -56,7 +41,5 @@ Each GitHub environment must have these secrets:
 | `AZURE_TENANT_ID` | Azure AD tenant ID |
 | `AZURE_SUBSCRIPTION_ID` | Azure subscription ID |
 | `STORAGE_ACCOUNT_NAME` | Target storage account name |
-| `RAG_STORAGE_ACCOUNT_NAME` | Storage account holding the RAG document containers |
-| `RAG_CONTAINER_WATER`, `RAG_CONTAINER_FISH`, `RAG_CONTAINER_FOI_DEMO`, `RAG_CONTAINER_CHEFS1` | RAG container name per tenant (only needed for tenants that are deployed) |
 
-The workflows authenticate via Azure OIDC (no stored client secrets). The service principal for each environment needs a federated credential with subject `repo:<org>/ai-form-client:environment:<env>` and the **Storage Blob Data Contributor** role on the storage account (and on the RAG storage account). The RAG storage account must also allow network access from the workflow runner.
+The workflows authenticate via Azure OIDC (no stored client secrets). The service principal for each environment needs a federated credential with subject `repo:<org>/ai-form-client:environment:<env>` and the **Storage Blob Data Contributor** role on the storage account.
