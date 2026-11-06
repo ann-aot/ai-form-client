@@ -4,10 +4,11 @@ on:
   push:
     branches:
       - dev
-      # - test
+      - test
       # - main
     paths:
       - 'src/tenant/water/**'
+      - '!src/tenant/water/rag/**'
       - '.github/workflows/deploy-tenant-reusable.yml'
       - '.github/workflows/deploy-water.yml'
 

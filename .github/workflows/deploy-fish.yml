@@ -8,6 +8,7 @@ on:
       - main
     paths:
       - 'src/tenant/fish/**'
+      - '!src/tenant/fish/rag/**'
       - '.github/workflows/deploy-tenant-reusable.yml'
       - '.github/workflows/deploy-fish.yml'
 
