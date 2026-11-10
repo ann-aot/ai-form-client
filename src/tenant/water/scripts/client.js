@@ -86,7 +86,7 @@ else {
 
     (function () {
 
-const clientId = '6da8c121-74db-4589-a3ff-80c16c6d6387';
+const clientId = '7a1c0271-557f-158f-2bb9-8921d1239e82';
 // TEST: const API_BACKEND_BASE_URL = 'https://nraif-671b-test-api.ambitiousmeadow-949bd8c6.canadacentral.azurecontainerapps.io';
 // DEV : const API_BACKEND_BASE_URL = 'https://nraif-671b-dev-api.icymushroom-bc5ec66d.canadacentral.azurecontainerapps.io';
 // const API_BACKEND_BASE_URL = 'http://localhost:8003';
