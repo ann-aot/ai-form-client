@@ -1,0 +1,123 @@
+{
+  "rag_system": "irrigation_calculation_faq",
+  "version": "2.0",
+  "type": "faq",
+  "description": "Frequently asked questions about irrigation water quantity calculations, unit conversions, and purpose entries for water licence applications.",
+  "faq_items": [
+    {
+      "id": "faq_001",
+      "question_patterns": [
+        "help with irrigation calculations",
+        "how do i calculate irrigation quantity",
+        "water quantity calculation",
+        "quantity calculations",
+        "how much water do i need",
+        "irrigation calculator",
+        "unit conversion tool",
+        "convert irrigation units",
+        "calculate annual quantity",
+        "calculate water usage",
+        "how to calculate irrigation demand",
+        "calculation for another purpose",
+        "help with calculations for another purpose",
+        "convert cubic metres",
+        "convert litres to cubic metres",
+        "water volume conversion"
+      ],
+      "response": "For irrigation or other water quantity calculations, always direct users to use the BC Agriculture Water Calculator: https://bcwatercalculator.ca/agriculture/welcome. This calculator helps users with irrigation water demand calculations, annual quantity estimates, and unit conversions. For purpose 'Livestock and Animal' applications, AI may assist with calculations after prompting the applicant to provide the type and number of livestock and the length of time per year water is used. For all other purposes, always direct users to the BC Agriculture Water Calculator.",
+      "additional_guidance": [
+        "People often ask questions like 'how do I calculate this?' or 'how much water would I need?'.",
+        "Always recommend using the BC Agriculture Water Calculator for accurate calculations and conversions for all non-livestock purposes.",
+        "If the question relates to irrigation area calculations, remind users to enter only the irrigated area size, not the total land size.",
+        "For livestock and animal purposes, gather inputs such as livestock type, number of animals, and duration of water use per year before assisting with calculations."
+      ],
+      "tags": [
+        "irrigation",
+        "calculations",
+        "quantity",
+        "unit conversion",
+        "water calculator",
+        "annual quantity",
+        "agriculture",
+        "bc agriculture water calculator",
+        "livestock",
+        "animal use"
+      ]
+    },
+    {
+      "id": "faq_002",
+      "question_patterns": [
+        "how many purposes can i have",
+        "multiple purposes",
+        "can i add more than one purpose",
+        "number of purposes",
+        "can i have multiple water use purposes",
+        "adding another purpose",
+        "new purpose for each use"
+      ],
+      "response": "Users can have as many purposes as needed. Clearly indicate that a new purpose must be entered for each different type of water use. Sometimes users think they can only enter one purpose, but multiple purposes are allowed.",
+      "additional_guidance": [
+        "Each purpose represents a separate type of water use.",
+        "Users should create a separate purpose entry for every distinct use case.",
+        "Clearly explain that users are not limited to a single purpose."
+      ],
+      "tags": [
+        "purposes",
+        "multiple purposes",
+        "water use",
+        "application purposes",
+        "new purpose"
+      ]
+    },
+    {
+      "id": "faq_003",
+      "question_patterns": [
+        "what happens if i need more water than applied for",
+        "what if i need less water",
+        "change in water requirement",
+        "more or less water than licence",
+        "adjust water licence amount",
+        "increase or decrease water allocation"
+      ],
+      "response": "If more water is needed, a new licence will be required. If less water is needed, it is considered a partial abandonment of the licensed amount.",
+      "additional_guidance": [
+        "Changes in water demand must be handled through licensing updates.",
+        "Increases require a new application process.",
+        "Reductions in use may result in partial abandonment of the existing licence volume."
+      ],
+      "tags": [
+        "licence",
+        "water allocation",
+        "increase water",
+        "decrease water",
+        "abandonment",
+        "water rights"
+      ]
+    },
+    {
+      "id": "faq_004",
+      "question_patterns": [
+        "help with additional information for irrigation",
+        "what additional information do i need for irrigation purpose",
+        "what to include in comments box irrigation",
+        "additional information irrigation application",
+        "what should i write in additional information",
+        "support filling irrigation details"
+      ],
+      "response": "Ask users to consider including the following information when filling out the additional information comment box: What is being irrigated such as crop type(s), area irrigated, seasonal use and irrigation cycle (e.g. growing season(s), peak demand periods), and any elaboration if the irrigation period is outside of the normal irrigation window.",
+      "additional_guidance": [
+        "Encourage users to be specific about crop types.",
+        "Ensure area and seasonal demand details are clearly described.",
+        "Highlight any unusual irrigation timing or extended irrigation periods."
+      ],
+      "tags": [
+        "irrigation",
+        "additional information",
+        "application details",
+        "crop type",
+        "irrigation cycle",
+        "comments box"
+      ]
+    }
+  ]
+}

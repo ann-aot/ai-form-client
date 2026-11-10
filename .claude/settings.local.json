@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv sync *)",
+      "Bash(uv run *)",
+      "Bash(uv add *)",
+      "Bash(PYTHONPATH=. uv run pytest tests/test_workflow_graph.py -v)",
+      "Bash(rm -f /tmp/debug_test.py; uv run python -c \" *)",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('run_automation.py'\\).read\\(\\)\\)\")",
+      "Bash(curl -s -m 3 http://localhost:8002/health)",
+      "Bash(env)",
+      "Bash(powershell -Command \"Get-ChildItem -Path 'c:\\\\Users\\\\Ann\\\\projects\\\\bcgov\\\\nr-ai-form\\\\ann-fork\\\\nr-ai-form\\\\agentic_ai_backend\\\\agents\\\\orchestrators' -Force -File | Select-Object Name\")",
+      "Bash(docker exec *)",
+      "Bash(powershell -Command \"Get-Item 'c:\\\\Users\\\\Ann\\\\projects\\\\bcgov\\\\nr-ai-form\\\\ann-fork\\\\nr-ai-form\\\\agentic_ai_backend\\\\docker-compose.yaml' | Select-Object LastWriteTime; Get-Date\")",
+      "Bash(powershell -Command \"Get-Date\")",
+      "Bash(curl -s -m 5 http://localhost:8002/health)",
+      "Bash(git stash *)",
+      "Bash(python -c ' *)",
+      "Bash(ls -la \"C:\\\\Users\\\\Ann\\\\.claude\\\\projects\\\\c--Users-Ann-projects-bcgov-nr-ai-form-ann-fork-nr-ai-form\\\\\" 2>&1 | head -50)",
+      "Read(//c/Users/Ann/.claude/projects/**)",
+      "Bash(/c/Python314/python.exe -c ' *)",
+      "Bash(/c/Python314/python.exe --version)",
+      "Bash(python extract.py \"C:/Users/Ann/.claude/projects/c--Users-Ann-projects-bcgov-nr-ai-form-ann-fork-nr-ai-form/9916711a-f885-441a-bd48-72e80c2a9718.jsonl\")",
+      "Bash(python extract.py \"C:/Users/Ann/.claude/projects/c--Users-Ann-projects-bcgov-nr-ai-form-ann-fork-nr-ai-form/1999969b-0bd4-4357-b36c-5d1769446171.jsonl\" \"2026-08-05\")",
+      "Bash(\"/c/Python314/python.exe\")",
+      "Bash(export PYTHONIOENCODING=utf-8)",
+      "Bash(python extract.py \"C:/Users/Ann/.claude/projects/c--Users-Ann-projects-bcgov-nr-ai-form-ann-fork-nr-ai-form/1999969b-0bd4-4357-b36c-5d1769446171.jsonl\" \"2026-08-06T\" file1_out.txt)",
+      "Bash(python extract.py \"C:/Users/Ann/.claude/projects/c--Users-Ann-projects-bcgov-nr-ai-form-ann-fork-nr-ai-form/7a783c47-41e0-499e-9a4a-0aade3204fcd.jsonl\" \"2026-08-06T\" file2_out.txt)",
+      "Bash(python3 -c ' *)",
+      "Bash(git -c core.autocrlf=false diff HEAD -- ai_bot_frontend/client.js)"
+    ],
+    "additionalDirectories": [
+      "\\tmp"
+    ]
+  }
+}

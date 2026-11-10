@@ -1,0 +1,55 @@
+{
+  "rag_system": "application_drawing_additional_knowledge",
+  "version": "4.0",
+  "type": "knowledge",
+  "description": "Supplementary knowledge related to water licence application drawings, including practical guidance on drawing quality and completeness, common issues that may affect review, general definitions of image file formats, and guidance for accessing current drawing standards.",
+  "knowledge_items": [
+    {
+      "id": "extra_001",
+      "section": "Common doubts",
+      "title": "Drawing Quality and Completeness",
+      "type": "guideline",
+      "keywords": [
+        "can I draw in a napkin",
+        "reviewer experience",
+        "common drawing issues",
+        "informal drawing",
+        "incomplete drawing",
+        "back-of-the-napkin",
+        "wrong point of diversion",
+        "missing system parts",
+        "follow-up",
+        "clarification delay",
+        "napkin",
+        "back of the napkin",
+        "informal drawing"
+      ],
+      "content": "Drawings are a key source of information for reviewers and are often relied on to understand how water is diverted, conveyed, and used, especially where form fields do not capture sufficient detail ('A picture is worth a thousand words'). Avoid common issues such as: informal or incomplete drawings (e.g., 'back-of-the-napkin'), incorrectly located features (e.g., wrong point of diversion), and missing parts of the system between the source and end use. These issues frequently result in follow-up or clarification before review can proceed."
+    },
+    {
+      "id": "extra_002",
+      "section": "Common Questions",
+      "title": "What is JPEG?",
+      "type": "definition",
+      "keywords": [
+        "jpeg definition",
+        "what is jpeg",
+        "jpeg"
+      ],
+      "content": "JPEG is a widely used image format for compressing photos, and images can also be stored in other formats such as PNG, GIF, or WebP depending on how they need to be used."
+    },
+    {
+      "id": "extra_003",
+      "section": "Application Drawing Standards",
+      "title": "Latest Application Drawing Standards",
+      "type": "guidance",
+      "keywords": [
+        "latest application drawing standards",
+        "current drawing standards",
+        "water licence application drawing standards",
+        "application drawing requirements"
+      ],
+      "content": "For the latest Water Licence Application Drawing Standards, refer to: https://www2.gov.bc.ca/assets/gov/environment/air-land-water/water/water-licensing-and-rights/water_licence_application_drawing_standards.pdf"
+    }
+  ]
+}

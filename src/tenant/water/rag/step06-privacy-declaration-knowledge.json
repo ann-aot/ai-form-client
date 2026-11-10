@@ -1,0 +1,142 @@
+{
+  "rag_system": "step6_privacy_declaration",
+  "version": "2.0",
+  "type": "knowledge",
+  "description": "Knowledge base for Step 6 - Privacy Declaration in a Water Licence Application. Covers legal authority for data collection, how personal information is used, and full text of relevant FOIPPA sections.",
+  "source_document": {
+    "title": "Freedom of Information and Protection of Privacy Act (FOIPPA)",
+    "type": "legislation",
+    "url": "https://www.bclaws.gov.bc.ca/civix/document/id/complete/statreg/96165_03#section26"
+  },
+  "knowledge_items": [
+    {
+      "id": "step6_001",
+      "section": "Step 6 - Privacy Declaration",
+      "title": "Legal Authority for Data Collection",
+      "type": "form_notice",
+      "keywords": [
+        "why is my information collected",
+        "legal authority",
+        "FOIPPA section 26",
+        "FOIPPA section 27",
+        "privacy law",
+        "data collection authority"
+      ],
+      "content": "Personal information is collected by FrontCounter BC under the legal authority of section 26(c) and 27(1)(a)(i) of the Freedom of Information and Protection of Privacy Act (the Act)."
+    },
+    {
+      "id": "step6_002",
+      "section": "Step 6 - Privacy Declaration",
+      "title": "FOIPPA Governs Data Use",
+      "type": "form_notice",
+      "keywords": [
+        "FOIPPA applies",
+        "privacy protection",
+        "data use rules",
+        "collection use disclosure"
+      ],
+      "content": "The collection, use, and disclosure of personal information is subject to the provisions of the Freedom of Information and Protection of Privacy Act (the Act)."
+    },
+    {
+      "id": "step6_003",
+      "section": "Step 6 - Privacy Declaration",
+      "title": "How Personal Information Is Used",
+      "type": "form_notice",
+      "keywords": [
+        "why is my data used",
+        "application processing",
+        "referrals",
+        "notifications",
+        "survey use"
+      ],
+      "content": "Personal information will be used to process inquiries or applications. It may also be shared when strictly necessary with partner agencies subject to the Act. It may also be used for referrals, notifications, and survey purposes."
+    },
+    {
+      "id": "step6_004",
+      "section": "Step 6 - Privacy Declaration",
+      "title": "Contact Information for Privacy Questions",
+      "type": "form_notice",
+      "keywords": [
+        "contact FrontCounter BC",
+        "privacy questions",
+        "phone number",
+        "Kamloops office",
+        "address",
+        "question regarding collection use disclosure",
+        "more information",
+        "contact info"
+      ],
+      "content": "For more information regarding collection, use, or disclosure of personal information, contact FrontCounter BC at 1-877-855-3222 or 441 Columbia Street, Kamloops, BC V2C 2T3.",
+      "contact": {
+        "phone": "1-877-855-3222",
+        "address": "FrontCounter BC Program Director, FrontCounter BC Provincial Operation, 441 Columbia Street, Kamloops, BC V2C 2T3"
+      }
+    },
+    {
+      "id": "step6_005",
+      "section": "Reference",
+      "title": "Freedom of Information and Protection of Privacy Act",
+      "type": "legal_reference",
+      "keywords": [
+        "FOIPPA",
+        "privacy law BC",
+        "freedom of information act",
+        "British Columbia privacy legislation"
+      ],
+      "content": "Freedom of Information and Protection of Privacy Act (FOIPPA) governs the collection, use, and disclosure of personal information by public bodies in British Columbia."
+    },
+    {
+      "id": "step6_006",
+      "section": "FOIPPA Section 25.1",
+      "title": "Unauthorized Collection, Use and Disclosure Prohibited",
+      "type": "legal_full_text",
+      "keywords": [
+        "unauthorized collection",
+        "privacy violation",
+        "employee data rules",
+        "FOIPPA restrictions"
+      ],
+      "content": "An employee, officer or director of a public body or an employee or associate of a service provider must not collect, use or disclose personal information except as authorized by this Act."
+    },
+    {
+      "id": "step6_007",
+      "section": "FOIPPA Section 26",
+      "title": "Purpose for Collection",
+      "type": "legal_full_text",
+      "keywords": [
+        "section 26 full",
+        "authorized collection",
+        "law enforcement",
+        "program necessity",
+        "consent collection"
+      ],
+      "content": "A public body may collect personal information only if it is authorized under an Act, for law enforcement, or if it relates directly to and is necessary for a program or activity, or with consent where appropriate, or for planning, evaluation, domestic violence prevention, public events observation, or identity services under section 69.2."
+    },
+    {
+      "id": "step6_008",
+      "section": "FOIPPA Section 27",
+      "title": "How Personal Information is Collected",
+      "type": "legal_full_text",
+      "keywords": [
+        "direct collection rule",
+        "exceptions",
+        "notification requirement",
+        "FOIPPA section 27"
+      ],
+      "content": "A public body must collect personal information directly from the individual unless authorized otherwise. Individuals must be informed of purpose, legal authority, and contact information unless exceptions apply. Employees must be notified unless it compromises accuracy, availability, or investigations."
+    },
+    {
+      "id": "step6_009",
+      "section": "FOIPPA Section 27.1",
+      "title": "When Information is Not Considered Collected",
+      "type": "legal_full_text",
+      "keywords": [
+        "not considered collected",
+        "data handling rules",
+        "transfer rules",
+        "FOIPPA section 27.1"
+      ],
+      "content": "Personal information is not considered collected if it does not relate to a program or activity and is only read and then deleted, destroyed, returned, or transferred. It may be transferred to another public body or government institution if it relates to their program or activity."
+    }
+  ]
+}

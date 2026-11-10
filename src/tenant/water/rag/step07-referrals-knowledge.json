@@ -1,0 +1,43 @@
+{
+  "rag_system": "step7_referrals",
+  "version": "2.0",
+  "type": "knowledge",
+  "description": "Explains the referral and notification process in Step 7 of a Water Licence Application, including when referrals are triggered and what the applicant consents to.",
+  "knowledge_items": [
+    {
+      "id": "referral_001",
+      "section": "Overview",
+      "title": "What Is a Referral or Notification",
+      "keywords": [
+        "what is a referral",
+        "referral notification water licence",
+        "application shared with agencies"
+      ],
+      "content": "A referral or notification is a process where an application is shared with relevant agencies or parties if the approval may affect their rights or resources. The purpose is to ensure that potentially impacted stakeholders, including government departments or specialists (e.g., habitat officers responsible for fish and wildlife), are informed and consulted when required."
+    },
+    {
+      "id": "referral_002",
+      "section": "When Referrals Apply",
+      "title": "When Are Referrals Required",
+      "keywords": [
+        "when is referral required",
+        "referral trigger",
+        "application impact on rights",
+        "not all applications referred"
+      ],
+      "content": "Referrals are not required for all applications. They are used only when an application may affect rights, resources, or citizens of British Columbia. For example, a habitat officer responsible for fish and wildlife may receive the application for review."
+    },
+    {
+      "id": "referral_003",
+      "section": "Applicant Consent",
+      "title": "Applicant Consent to Referral",
+      "keywords": [
+        "applicant consent referral",
+        "disclosure of information",
+        "first nations referral",
+        "government ministry referral"
+      ],
+      "content": "The applicant consents to the disclosure of information contained in the application to other agencies, government ministries, affected parties, or First Nations for referral or consultation purposes."
+    }
+  ]
+}

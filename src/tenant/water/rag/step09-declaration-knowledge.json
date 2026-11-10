@@ -1,0 +1,82 @@
+{
+  "rag_system": "step9_declarations",
+  "version": "2.0",
+  "type": "knowledge",
+  "description": "Knowledge base for Step-Declarations of the Water Licence Application. Covers important legal notices applicants must review before submission and the declaration statement.",
+  "knowledge_items": [
+    {
+      "id": "decl_001",
+      "section": "Important Notices",
+      "title": "Submitting Does Not Authorize Water Use",
+      "keywords": [
+        "submitting application does not authorize water use",
+        "section 6 Water Sustainability Act",
+        "no water use before licence granted"
+      ],
+      "content": "Submitting a water licence application does not authorize diversion, use, or storage of water except for limited testing purposes under Section 6(2)(b) of the Water Sustainability Act."
+    },
+    {
+      "id": "decl_002",
+      "section": "Important Notices",
+      "title": "No Authorization for Groundwater Construction Use",
+      "keywords": [
+        "groundwater construction",
+        "well water construction purposes",
+        "no authorization groundwater"
+      ],
+      "content": "Submitting an application does not authorize use of water from wells or groundwater sources for construction purposes."
+    },
+    {
+      "id": "decl_003",
+      "section": "Important Notices",
+      "title": "Review and Decision Required Before Licence Is Granted",
+      "keywords": [
+        "application review process",
+        "decision before licence",
+        "additional information may be requested"
+      ],
+      "content": "The application must be reviewed and a decision must be made before any water licence is granted. Additional information may be requested during the review process."
+    },
+    {
+      "id": "decl_004",
+      "section": "Important Notices",
+      "title": "Federal Fisheries Act May Apply",
+      "keywords": [
+        "Fisheries Act requirements",
+        "federal requirements water licence",
+        "projects near water DFO"
+      ],
+      "content": "Applications may be subject to federal Fisheries Act requirements.",
+      "references": [
+        {
+          "organization": "Fisheries and Oceans Canada",
+          "resource": "Projects Near Water",
+          "url": "http://www.dfo-mpo.gc.ca/pnw-ppe/index-eng.html"
+        }
+      ]
+    },
+    {
+      "id": "decl_005",
+      "section": "Important Notices",
+      "title": "Application Locked After Proceeding",
+      "keywords": [
+        "application locked",
+        "cannot edit after next",
+        "final submission warning"
+      ],
+      "content": "Once the user clicks 'Next', the application will be locked and cannot be edited."
+    },
+    {
+      "id": "decl_006",
+      "section": "Declaration",
+      "title": "Applicant Declaration Statement",
+      "type": "legal_declaration",
+      "keywords": [
+        "declaration statement",
+        "information is complete and accurate",
+        "legal attestation submission"
+      ],
+      "content": "The applicant declares that the information contained in the form is complete and accurate. The user must explicitly confirm this before submission."
+    }
+  ]
+}
