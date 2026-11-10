@@ -86,7 +86,7 @@ else {
 
     (function () {
 
-const clientId = '11111111-1111-4111-8111-111111111111';
+const clientId = '6da8c121-74db-4589-a3ff-80c16c6d6387';
 // TEST: const API_BACKEND_BASE_URL = 'https://nraif-671b-test-api.ambitiousmeadow-949bd8c6.canadacentral.azurecontainerapps.io';
 // DEV : const API_BACKEND_BASE_URL = 'https://nraif-671b-dev-api.icymushroom-bc5ec66d.canadacentral.azurecontainerapps.io';
 // const API_BACKEND_BASE_URL = 'http://localhost:8003';
@@ -94,8 +94,10 @@ const clientId = '11111111-1111-4111-8111-111111111111';
 // const API_BACKEND_BASE_URL = 'https://nraif-671b-dev-commonservi-api.livelymushroom-b9ecaae0.canadacentral.azurecontainerapps.io';
 // test
 // const API_BACKEND_BASE_URL = 'https://nraif-671b-test-api.redground-c9aa9e63.canadacentral.azurecontainerapps.io'
-// prod
-const API_BACKEND_BASE_URL = 'https://nraif-671b-prod-api.proudsand-7946cc3a.canadacentral.azurecontainerapps.io';
+// prod (direct container app, superseded by Front Door below)
+// const API_BACKEND_BASE_URL = 'https://nraif-671b-prod-api.proudsand-7946cc3a.canadacentral.azurecontainerapps.io';
+// prod (Azure Front Door)
+const API_BACKEND_BASE_URL = 'https://nr-ai-form-prod-api-fd-bpf6chbhdhf6c5gd.a03.azurefd.net';
 
 const CONVERSATION_HISTORY_API_URL = new URL(`/tenants/${clientId}/history`, API_BACKEND_BASE_URL).toString();
 // Derive ws/wss from the API backend URL so local http uses ws and deployed
